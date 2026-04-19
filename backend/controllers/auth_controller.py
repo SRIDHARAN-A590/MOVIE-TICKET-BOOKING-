@@ -14,6 +14,8 @@ def register_user(data):
             return jsonify({'message': 'All fields are required'}), 400
             
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
         
         cursor.execute("SELECT * FROM USERS WHERE email = %s", (email,))
@@ -45,6 +47,8 @@ def login_user(data):
         password = data.get('password')
         
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM USERS WHERE email = %s", (email,))
         user = cursor.fetchone()

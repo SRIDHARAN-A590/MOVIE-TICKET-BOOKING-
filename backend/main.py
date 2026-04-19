@@ -31,6 +31,9 @@ def admin_required(f):
             data = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
             user_id = data['user_id']
             conn = get_db_connection()
+            if not conn:
+                return jsonify({'message': 'System Error: Database connection failed. Please check backend logs.'}), 500
+            
             cursor = conn.cursor(dictionary=True)
             cursor.execute("SELECT role FROM USERS WHERE user_id=%s", (user_id,))
             user = cursor.fetchone()
@@ -38,7 +41,7 @@ def admin_required(f):
             if not user or user['role'] != 'admin':
                 return jsonify({'message': 'Admin access required'}), 403
         except Exception as e:
-            return jsonify({'message': 'Invalid token'}), 401
+            return jsonify({'message': 'Authentication failed or Invalid token'}), 401
         return f(user_id, *args, **kwargs)
     return decorated
 

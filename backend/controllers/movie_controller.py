@@ -23,6 +23,8 @@ def proxy_image(url):
 def get_all_movies():
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM MOVIES")
         movies = cursor.fetchall()
@@ -36,6 +38,8 @@ def get_all_movies():
 def get_movie_details(movie_id):
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM MOVIES WHERE movie_id = %s", (movie_id,))
         movie = cursor.fetchone()
@@ -53,6 +57,8 @@ def get_movie_details(movie_id):
 def get_movie_shows(movie_id):
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
         query = """
             SELECT s.show_id, s.show_time, s.price_base, t.name as theatre_name, t.location 
@@ -73,6 +79,8 @@ def get_movie_shows(movie_id):
 def get_show_seats(show_id):
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
         # Fetch show details along with movie poster
         query = """

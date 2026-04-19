@@ -5,6 +5,8 @@ from utils.db import get_db_connection
 def get_stats():
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
         # Summary for main dashboard
         cursor.execute("SELECT COUNT(*) as count FROM MOVIES")
@@ -34,6 +36,8 @@ def admin_get_stats(): # Alias for compatibility
 def add_movie(data):
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO MOVIES (title, description, duration_mins, genre, language, release_date, poster_url)
@@ -49,6 +53,8 @@ def add_movie(data):
 def update_movie(movie_id, data):
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor()
         cursor.execute("""
             UPDATE MOVIES SET title=%s, description=%s, duration_mins=%s, genre=%s, language=%s, release_date=%s, poster_url=%s
@@ -64,6 +70,8 @@ def update_movie(movie_id, data):
 def delete_movie(movie_id):
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor()
         cursor.execute("DELETE FROM MOVIES WHERE movie_id = %s", (movie_id,))
         conn.commit()
@@ -77,6 +85,8 @@ def delete_movie(movie_id):
 def get_all_theatres():
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM THEATRE")
         res = cursor.fetchall()
@@ -89,6 +99,8 @@ def get_all_theatres():
 def add_theatre(data):
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor()
         cursor.execute("INSERT INTO THEATRE (name, location, total_screens) VALUES (%s, %s, %s)", 
                        (data['name'], data['location'], data.get('total_screens', 1)))
@@ -102,6 +114,8 @@ def add_theatre(data):
 def delete_theatre(theatre_id):
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor()
         cursor.execute("DELETE FROM THEATRE WHERE theatre_id = %s", (theatre_id,))
         conn.commit()
@@ -115,6 +129,8 @@ def delete_theatre(theatre_id):
 def get_all_shows():
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
         query = """
             SELECT s.*, m.title as movie_title, t.name as theatre_name 
@@ -134,6 +150,8 @@ def get_all_shows():
 def add_show(data):
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor()
         cursor.execute("INSERT INTO SHOWS (movie_id, theatre_id, show_time, price_base) VALUES (%s, %s, %s, %s)",
                        (data['movie_id'], data['theatre_id'], data['show_time'], data['price_base']))
@@ -147,6 +165,8 @@ def add_show(data):
 def delete_show(show_id):
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor()
         cursor.execute("DELETE FROM SHOWS WHERE show_id = %s", (show_id,))
         conn.commit()
@@ -159,6 +179,8 @@ def delete_show(show_id):
 def update_show(show_id, data):
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor()
         cursor.execute("""
             UPDATE SHOWS SET movie_id=%s, theatre_id=%s, show_time=%s, price_base=%s
@@ -175,6 +197,8 @@ def update_show(show_id, data):
 def get_admin_bookings():
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
         query = """
             SELECT b.*, u.name as user_name, u.email, m.title as movie_title, t.name as theatre_name 
@@ -196,6 +220,8 @@ def get_admin_bookings():
 def cancel_booking(booking_id):
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor()
         cursor.execute("UPDATE BOOKING SET booking_status = 'Cancelled' WHERE booking_id = %s", (booking_id,))
         conn.commit()
@@ -208,6 +234,8 @@ def cancel_booking(booking_id):
 def get_all_users():
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT user_id, name, email, role, created_at FROM USERS")
         res = cursor.fetchall()
