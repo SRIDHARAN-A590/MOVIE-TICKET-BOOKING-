@@ -1,9 +1,17 @@
-import mysql.connector
+import os, mysql.connector
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def setup_db():
     try:
-        conn = mysql.connector.connect(host='localhost', user='root', password='root', database='movie_booking_system')
+        conn = mysql.connector.connect(
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            database=os.getenv("DB_NAME")
+        )
         cursor = conn.cursor(dictionary=True)
         
         cursor.execute("SELECT movie_id, title FROM MOVIES")

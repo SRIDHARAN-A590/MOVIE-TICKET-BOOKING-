@@ -1,9 +1,16 @@
-import bcrypt
-import mysql.connector
+import os, bcrypt
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def seed_users():
     try:
-        conn = mysql.connector.connect(host='localhost', user='root', password='root', database='movie_booking_system')
+        conn = mysql.connector.connect(
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            database=os.getenv("DB_NAME")
+        )
         cursor = conn.cursor()
         
         # Clear users for a clean start if needed, or just update/insert
