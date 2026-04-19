@@ -11,6 +11,10 @@ from utils.db import get_db_connection
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/')
+def home():
+    return "Movie Ticket Booking System is Running ✅"
+
 JWT_SECRET = os.getenv("JWT_SECRET", "supersecretjwtkey123")
 
 # --- Admin Guard ---
