@@ -69,7 +69,7 @@
                     const card = document.createElement('div');
                     card.className = 'movie-card';
                     card.onclick = () => window.location.href = `movie.html?id=${movie.movie_id}`;
-                    const posterUrl = `http://localhost:5000/api/proxy/image?url=${encodeURIComponent(movie.poster_url)}`;
+                    const posterUrl = `${API_URL}/proxy/image?url=${encodeURIComponent(movie.poster_url)}`;
                     card.innerHTML = `
                         <div class="card-img-wrapper">
                             <img src="${posterUrl}" alt="${movie.title}" referrerpolicy="no-referrer">

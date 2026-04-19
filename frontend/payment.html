@@ -69,7 +69,7 @@
         // Set UI
         document.getElementById('payAmount').textContent = `₹${parseFloat(amount).toFixed(2)}`;
         if (poster) {
-            document.getElementById('pageBackdrop').src = `http://localhost:5000/api/proxy/image?url=${poster}`;
+            document.getElementById('pageBackdrop').src = `${API_URL}/proxy/image?url=${poster}`;
         }
         document.getElementById('loader').style.display = 'none';
 

@@ -55,7 +55,7 @@
                 const movie = await Api.getMovieDetails(movieId);
                 document.title = `${movie.title} | CineTick`;
                 
-                const proxyPrefix = 'http://localhost:5000/api/proxy/image?url=';
+                const proxyPrefix = '/api/proxy/image?url=';
                 
                 // Using poster as backdrop for now, or could use a specific backdrop URL if available
                 document.getElementById('backdrop').src = proxyPrefix + encodeURIComponent(movie.poster_url);

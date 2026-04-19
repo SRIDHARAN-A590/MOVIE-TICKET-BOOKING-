@@ -71,7 +71,7 @@
 
                 // Set immersive backdrop
                 if (res.poster_url) {
-                    document.getElementById('pageBackdrop').src = `http://localhost:5000/api/proxy/image?url=${encodeURIComponent(res.poster_url)}`;
+                    document.getElementById('pageBackdrop').src = `${API_URL}/proxy/image?url=${encodeURIComponent(res.poster_url)}`;
                 }
 
                 const container = document.getElementById('seatsGrid');

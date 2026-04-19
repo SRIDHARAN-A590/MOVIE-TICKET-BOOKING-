@@ -57,7 +57,7 @@
             try {
                 // Fetch Movie Info
                 const movie = await Api.getMovieDetails(movieId);
-                const proxyUrl = `http://localhost:5000/api/proxy/image?url=${encodeURIComponent(movie.poster_url)}`;
+                const proxyUrl = `${API_URL}/proxy/image?url=${encodeURIComponent(movie.poster_url)}`;
                 
                 document.getElementById('moviePoster').src = proxyUrl;
                 document.getElementById('pageBackdrop').src = proxyUrl;
