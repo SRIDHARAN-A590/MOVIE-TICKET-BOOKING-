@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import os, jwt
 from functools import wraps
@@ -8,12 +8,11 @@ from controllers import admin_controller
 from utils.auth import token_required
 from utils.db import get_db_connection
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            template_folder='../frontend',
+            static_folder='../frontend',
+            static_url_path='')
 CORS(app)
-
-@app.route('/')
-def home():
-    return "Movie Ticket Booking System is Running ✅"
 
 JWT_SECRET = os.getenv("JWT_SECRET", "supersecretjwtkey123")
 
@@ -42,6 +41,10 @@ def admin_required(f):
             return jsonify({'message': 'Invalid token'}), 401
         return f(user_id, *args, **kwargs)
     return decorated
+
+@app.route('/')
+def home():
+    return render_template('index.html')
 
 # --- AUTH ROUTES ---
 @app.route('/api/auth/register', methods=['POST'])
