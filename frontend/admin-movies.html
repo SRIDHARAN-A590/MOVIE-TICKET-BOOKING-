@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Movies | CineTick Admin</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <div class="logo">CineTick</div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="admin-dashboard.html" class="nav-link"><span>📊</span> Dashboard</a></li>
+                    <li class="nav-item"><a href="admin-movies.html" class="nav-link active"><span>🎬</span> Movies</a></li>
+                    <li class="nav-item"><a href="admin-theatres.html" class="nav-link"><span>🏛️</span> Theatres</a></li>
+                    <li class="nav-item"><a href="admin-shows.html" class="nav-link"><span>🎭</span> Shows</a></li>
+                    <li class="nav-item"><a href="admin-bookings.html" class="nav-link"><span>📋</span> Bookings</a></li>
+                    <li class="nav-item"><a href="admin-users.html" class="nav-link"><span>👥</span> Users</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-bottom" style="padding: 1.5rem;">
+                <button onclick="Api.logout()" class="nav-link" style="width: 100%; border: none; cursor: pointer; background:rgba(229,9,20,0.1); color:var(--primary);">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>Movie Management</h1>
+                <button class="btn-primary" style="padding: 0.8rem 1.5rem; border-radius: 12px;" onclick="openModal('addMovie')">+ Add New Movie</button>
+            </header>
+
+            <div class="data-card">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Poster</th>
+                            <th>Title</th>
+                            <th>Genre</th>
+                            <th>Release Date</th>
+                            <th>Duration</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="movieTable">
+                        <!-- Movies load here -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Movie Modal -->
+    <div id="addMovie" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 2rem;">Add New Movie</h2>
+            <form id="movieForm">
+                <div class="form-group">
+                    <label>Movie Title</label>
+                    <input type="text" id="title" class="form-control" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Genre</label>
+                        <input type="text" id="genre" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Language</label>
+                        <input type="text" id="language" class="form-control" required>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Duration (mins)</label>
+                        <input type="number" id="duration" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Release Date</label>
+                        <input type="date" id="releaseDate" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Poster URL</label>
+                    <input type="url" id="posterUrl" class="form-control" placeholder="https://..." required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="description" class="form-control" rows="3"></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button type="submit" class="btn-primary" style="flex: 1; padding: 1rem; border-radius: 10px;">Save Movie</button>
+                    <button type="button" class="btn-outline" style="flex: 1; padding: 1rem; border-radius: 10px; border-color: #333;" onclick="closeModal('addMovie')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        async function loadMovies() {
+            try {
+                const movies = await AdminApi.getMovies();
+                const tbody = document.getElementById('movieTable');
+                tbody.innerHTML = '';
+                movies.forEach(m => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><img src="${m.poster_url}" style="width: 50px; height: 75px; object-fit: cover; border-radius: 4px;"></td>
+                        <td style="font-weight: 600;">${m.title}</td>
+                        <td>${m.genre}</td>
+                        <td>${new Date(m.release_date).toLocaleDateString()}</td>
+                        <td>${m.duration_mins}m</td>
+                        <td>
+                            <button onclick="deleteMovie(${m.movie_id})" style="background: none; border: none; cursor: pointer; color: var(--primary);">🗑️ Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        document.getElementById('movieForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                title: document.getElementById('title').value,
+                genre: document.getElementById('genre').value,
+                language: document.getElementById('language').value,
+                duration_mins: document.getElementById('duration').value,
+                release_date: document.getElementById('releaseDate').value,
+                poster_url: document.getElementById('posterUrl').value,
+                description: document.getElementById('description').value
+            };
+            try {
+                await AdminApi.addMovie(data);
+                closeModal('addMovie');
+                loadMovies();
+                e.target.reset();
+            } catch (err) { alert(err.message); }
+        });
+
+        async function deleteMovie(id) {
+            if (confirm('Are you sure you want to delete this movie?')) {
+                try {
+                    await AdminApi.deleteMovie(id);
+                    loadMovies();
+                } catch (err) { alert(err.message); }
+            }
+        }
+
+        loadMovies();
+    </script>
+</body>
+</html>

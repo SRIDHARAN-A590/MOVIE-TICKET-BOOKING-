@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineTick | Movie Details</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="background: var(--bg-main);">
+    <div id="loader" class="loader-container"><div class="loader"></div></div>
+
+    <nav id="navbar" class="scrolled">
+        <div class="logo"><a href="index.html" style="text-decoration:none; color:inherit;">CineTick</a></div>
+        <div class="nav-links nav-right"></div>
+    </nav>
+    
+    <div id="movieHero" class="movie-details-hero">
+        <img id="backdrop" class="backdrop" src="" alt="Backdrop" referrerpolicy="no-referrer">
+        <div class="hero-overlay"></div>
+    </div>
+
+    <main class="details-wrapper">
+        <img id="poster" class="main-poster" src="" alt="Poster" referrerpolicy="no-referrer">
+        
+        <div class="movie-info-card">
+            <h1 id="title">Loading...</h1>
+            
+            <div class="meta-row">
+                <div class="meta-item"><span>⏱</span> <span id="duration" style="color:white; margin-left:5px;"></span></div>
+                <div class="meta-item"><span>🎬</span> <span id="genre" style="color:white; margin-left:5px;"></span></div>
+                <div class="meta-item"><span>🌐</span> <span id="language" style="color:white; margin-left:5px;"></span></div>
+                <div class="meta-item"><span>📅</span> <span id="releaseDate" style="color:white; margin-left:5px;"></span></div>
+            </div>
+
+            <p id="description" class="description-box"></p>
+
+            <button id="viewShowsBtn" class="btn btn-primary" style="padding: 1.2rem 3rem; font-size: 1.2rem; border-radius: 12px; letter-spacing: 1px;">
+                BOOK TICKETS / VIEW SHOWS
+            </button>
+        </div>
+    </main>
+
+    <div id="toast"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const movieId = urlParams.get('id');
+        
+        if (!movieId) window.location.href = 'index.html';
+        
+        async function loadMovie() {
+            try {
+                const movie = await Api.getMovieDetails(movieId);
+                document.title = `${movie.title} | CineTick`;
+                
+                const proxyPrefix = 'http://localhost:5000/api/proxy/image?url=';
+                
+                // Using poster as backdrop for now, or could use a specific backdrop URL if available
+                document.getElementById('backdrop').src = proxyPrefix + encodeURIComponent(movie.poster_url);
+                document.getElementById('poster').src = proxyPrefix + encodeURIComponent(movie.poster_url);
+                
+                document.getElementById('title').textContent = movie.title;
+                document.getElementById('duration').textContent = `${movie.duration_mins} mins`;
+                document.getElementById('genre').textContent = movie.genre;
+                document.getElementById('language').textContent = movie.language;
+                document.getElementById('releaseDate').textContent = new Date(movie.release_date).getFullYear();
+                document.getElementById('description').textContent = movie.description;
+                
+                document.getElementById('viewShowsBtn').onclick = () => {
+                    if (!Api.isLoggedIn()) {
+                        showToast('Please login to continue booking', true);
+                        setTimeout(() => window.location.href = 'login.html', 1500);
+                    } else {
+                        window.location.href = `shows.html?id=${movie.movie_id}`;
+                    }
+                };
+            } catch (error) {
+                showToast('Failed to load movie details', true);
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+        
+        loadMovie();
+    </script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Summary | CineTick</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="loader" class="loader-container"><div class="loader"></div></div>
+    <nav id="navbar" class="scrolled">
+        <div class="logo"><a href="index.html" style="text-decoration:none; color:inherit;">CineTick</a></div>
+        <div class="nav-links nav-right"></div>
+    </nav>
+    
+    <!-- Background Poster -->
+    <div class="poster-bg">
+        <img id="pageBackdrop" src="" alt="" referrerpolicy="no-referrer">
+    </div>
+
+    <main class="container">
+        <div class="summary-card">
+            <h2 style="font-size: 2rem; margin-bottom: 2rem; text-align:center;">Booking Summary</h2>
+            
+            <div class="summary-item">
+                <label>Seats Selected</label>
+                <span id="seatsDisplay"></span>
+            </div>
+            <div class="summary-item">
+                <label>Convineince Fee</label>
+                <span>₹25.00</span>
+            </div>
+            <div class="summary-item">
+                <label>Tax (GST 18%)</label>
+                <span id="taxDisplay"></span>
+            </div>
+            <div class="summary-item" style="border-bottom:none; margin-top:1rem;">
+                <label style="font-size: 1.5rem; color:white;">Amount to Pay</label>
+                <span id="finalAmount" style="font-size: 1.8rem; color:var(--primary);"></span>
+            </div>
+
+            <button class="btn btn-primary" style="width:100%; padding:1.2rem; font-size:1.2rem; margin-top:2rem;" onclick="proceedToPayment()">CONFIRM & PROCEED</button>
+            <a href="index.html" style="display:block; text-align:center; margin-top:1.5rem; color:var(--text-gray); text-decoration:none;">Cancel Booking</a>
+        </div>
+    </main>
+
+    <div id="toast"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const showId = urlParams.get('showId');
+        const seatIds = urlParams.get('seats');
+        const seatNums = urlParams.get('seatNums');
+        const rawTotal = parseFloat(urlParams.get('total'));
+
+        if (!showId || !seatIds) window.location.href = 'index.html';
+
+        async function init() {
+            try {
+                // Fetch poster info
+                const res = await Api.getShowSeats(showId);
+                if (res.poster_url) {
+                    document.getElementById('pageBackdrop').src = `http://localhost:5000/api/proxy/image?url=${encodeURIComponent(res.poster_url)}`;
+                }
+
+                document.getElementById('seatsDisplay').textContent = seatNums;
+                const tax = rawTotal * 0.18;
+                const final = rawTotal + tax + 25;
+                
+                document.getElementById('taxDisplay').textContent = `₹${tax.toFixed(2)}`;
+                document.getElementById('finalAmount').textContent = `₹${final.toFixed(2)}`;
+            } catch (err) { console.error(err); }
+            finally { document.getElementById('loader').style.display = 'none'; }
+        }
+
+        async function proceedToPayment() {
+            const tax = rawTotal * 0.18;
+            const final = rawTotal + tax + 25;
+            
+            try {
+                // First create the booking (pending state)
+                const res = await Api.request('/bookings', 'POST', {
+                    show_id: showId,
+                    seat_ids: seatIds.split(',').map(Number),
+                    total_amount: final
+                });
+                
+                // Get poster url from current backdrop
+                const posterUrl = document.getElementById('pageBackdrop').src.split('url=')[1];
+                window.location.href = `payment.html?bookingId=${res.booking_id}&amount=${final}&poster=${posterUrl}`;
+            } catch (err) {
+                showToast(err.message, true);
+            }
+        }
+        init();
+    </script>
+</body>
+</html>

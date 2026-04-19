@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | CineTick</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="logo" style="display:block; text-align:center; margin-bottom: 2rem;">CineTick</div>
+            
+            <div class="login-tabs" style="display:flex; background:rgba(255,255,255,0.05); border-radius:12px; margin-bottom:2rem; padding:0.4rem;">
+                <button type="button" class="tab-btn active" id="userTab" onclick="switchLoginMode('customer')" style="flex:1; padding:0.8rem; border:none; background:none; color:white; font-weight:700; cursor:pointer; border-radius:10px;">👤 USER</button>
+                <button type="button" class="tab-btn" id="adminTab" onclick="switchLoginMode('admin')" style="flex:1; padding:0.8rem; border:none; background:none; color:var(--text-gray); font-weight:700; cursor:pointer; border-radius:10px;">🔒 ADMIN</button>
+            </div>
+
+            <h2 id="loginTitle">Welcome Back</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; padding:1rem; font-size:1.1rem; margin-top:1rem;">Sign In</button>
+                
+
+                <div style="margin-top: 1.5rem; text-align: center;">
+                    <p style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">DEVELOPER QUICK LOGIN</p>
+                    <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                        <button type="button" onclick="demoLogin('admin@gmail.com', 'admin', 'admin')" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.7rem; border-color: #444;">DEMO ADMIN</button>
+                        <button type="button" onclick="demoLogin('john@example.com', 'password123', 'customer')" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.7rem; border-color: #444;">DEMO USER</button>
+                    </div>
+                </div>
+            </form>
+            <div class="auth-footer">
+                New to CineTick? <a href="register.html">Join Now</a>
+                <br><br>
+                <br>
+                <a href="index.html" style="font-size:0.9rem; opacity:0.6;">Back to Home</a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        let currentMode = 'customer';
+
+        function switchLoginMode(mode) {
+            currentMode = mode;
+            const userTab = document.getElementById('userTab');
+            const adminTab = document.getElementById('adminTab');
+            const title = document.getElementById('loginTitle');
+
+            if (mode === 'admin') {
+                adminTab.style.background = 'var(--primary)';
+                adminTab.style.color = 'white';
+                userTab.style.background = 'none';
+                userTab.style.color = 'var(--text-gray)';
+                title.textContent = 'Admin Console';
+            } else {
+                userTab.style.background = 'var(--primary)';
+                userTab.style.color = 'white';
+                adminTab.style.background = 'none';
+                adminTab.style.color = 'var(--text-gray)';
+                title.textContent = 'Welcome Back';
+            }
+        }
+
+        function showGoogleFeature() {
+            showToast('Google login will be available soon!', false);
+        }
+        
+        if (Api.isLoggedIn()) {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user.role === 'admin') window.location.href = 'admin-dashboard.html';
+            else window.location.href = 'index.html';
+        }
+        
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const res = await Api.login(email, password);
+                
+                // Intent check
+                if (currentMode === 'admin' && res.user.role !== 'admin') {
+                    throw new Error("You do not have Administrator access.");
+                }
+
+                Api.setToken(res.token, res.user);
+                showToast('Login successful!', false);
+                
+                setTimeout(() => {
+                    if (res.user.role === 'admin' && currentMode === 'admin') {
+                        window.location.href = 'admin-dashboard.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                }, 1000);
+            } catch (error) {
+                showToast(error.message, true);
+            }
+        });
+        
+        async function demoLogin(email, password, mode) {
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = password;
+            switchLoginMode(mode);
+            // Auto click sign in
+            const btn = document.querySelector('button[type="submit"]');
+            btn.click();
+        }
+
+        switchLoginMode('customer');
+    </script>
+</body>
+</html>

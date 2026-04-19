@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings | CineTick</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="loader" class="loader-container"><div class="loader"></div></div>
+
+    <!-- Background Decoration -->
+    <div class="poster-bg">
+        <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&q=80&w=2000" alt="">
+    </div>
+
+    <nav id="navbar" class="scrolled">
+        <div class="logo"><a href="index.html" style="text-decoration:none; color:inherit;">CineTick</a></div>
+        <div class="nav-links nav-right"></div>
+    </nav>
+    
+    <main class="history-container">
+        <div class="history-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+                <h1 style="font-size: 2.5rem; font-weight: 800;">Your Bookings</h1>
+                <div style="background:var(--primary); width:60px; height:4px; border-radius:2px;"></div>
+            </div>
+            
+            <div id="historyTableWrapper" style="overflow-x: auto;">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Movie</th>
+                            <th>Theatre</th>
+                            <th>Date & Time</th>
+                            <th>Seats</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="noBookings" style="display:none; text-align:center; padding: 4rem 0; opacity:0.5;">
+                <p style="font-size: 1.2rem;">You haven't booked any movies yet!</p>
+                <a href="index.html" class="btn btn-outline" style="margin-top: 2rem;">Explore Movies</a>
+            </div>
+        </div>
+    </main>
+    
+    <div id="toast"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        if (!Api.isLoggedIn()) {
+            window.location.href = 'login.html';
+        }
+        
+        async function loadHistory() {
+            try {
+                const history = await Api.getHistory();
+                const tbody = document.getElementById('historyBody');
+                
+                if (!history || history.length === 0) {
+                    document.getElementById('historyTableWrapper').style.display = 'none';
+                    document.getElementById('noBookings').style.display = 'block';
+                    return;
+                }
+                
+                history.forEach(booking => {
+                    const statusClass = booking.booking_status === 'Confirmed' ? 'status-success' : 'status-pending';
+                    const date = new Date(booking.show_time);
+                    const formattedDate = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+                    const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    const tr = document.createElement('tr');
+                    const canCancel = booking.booking_status === 'Confirmed';
+                    
+                    tr.innerHTML = `
+                        <td>
+                            <div style="display:flex; align-items:center; gap:1rem;">
+                                <div style="width:4px; height:30px; background:var(--primary); border-radius:2px;"></div>
+                                <span style="font-weight:700; font-size:1.1rem;">${booking.movie_title}</span>
+                            </div>
+                        </td>
+                        <td style="color:var(--text-gray);">${booking.theatre_name}</td>
+                        <td style="font-weight:500;">${formattedDate} • <span style="color:var(--primary);">${formattedTime}</span></td>
+                        <td style="letter-spacing:1px; font-family:monospace;">${booking.seats}</td>
+                        <td style="font-weight:800; font-size:1.1rem;">₹${parseFloat(booking.total_amount).toFixed(2)}</td>
+                        <td>
+                            <div style="display:flex; flex-direction:column; gap:0.5rem; align-items:flex-start;">
+                                <span class="status-badge ${statusClass}">${booking.booking_status}</span>
+                                ${canCancel ? `<button onclick="handleCancel(${booking.booking_id})" style="background:none; border:none; color:var(--text-gray); font-size:0.75rem; text-decoration:underline; cursor:pointer;">Cancel Ticket</button>` : ''}
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                showToast('Failed to sync history', true);
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+        
+        async function handleCancel(id) {
+            if (confirm('Are you sure you want to cancel this booking? This will release your seats.')) {
+                try {
+                    await Api.cancelBooking(id);
+                    showToast('Ticket cancelled successfully', false);
+                    setTimeout(() => window.location.reload(), 1500);
+                } catch (err) {
+                    showToast(err.message, true);
+                }
+            }
+        }
+        
+        loadHistory();
+    </script>
+</body>
+</html>

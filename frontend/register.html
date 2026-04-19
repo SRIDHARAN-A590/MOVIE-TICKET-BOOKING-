@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - CineTick</title>
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+    <nav>
+        <div class="logo">
+            <a href="index.html" style="text-decoration:none; color:inherit;">CineTick</a>
+        </div>
+    </nav>
+    
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="logo" style="display:block; text-align:center; margin-bottom: 2rem;">CineTick</div>
+            <h2>Create Account</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="name" class="form-control" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; padding:1rem; font-size:1.1rem; margin-top:1rem;">Sign Up</button>
+                
+            </form>
+            <div class="auth-footer">
+                Already have an account? <a href="login.html">Log In</a>
+                <br><br>
+                <a href="index.html" style="font-size:0.9rem; opacity:0.6;">Back to Home</a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        function showGoogleFeature() {
+            showToast('Google login will be available soon!', false);
+        }
+        if (Api.isLoggedIn()) window.location.href = 'index.html';
+        
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const res = await Api.register(name, email, password);
+                Api.setToken(res.token, res.user);
+                showToast('Registration successful! Welcome.');
+                setTimeout(() => window.location.href = 'index.html', 1500);
+            } catch (error) {
+                showToast(error.message, true);
+            }
+        });
+    </script>
+</body>
+</html>

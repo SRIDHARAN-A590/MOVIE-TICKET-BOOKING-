@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | CineTick Admin</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <div class="logo">CineTick</div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="admin-dashboard.html" class="nav-link"><span>📊</span> Dashboard</a></li>
+                    <li class="nav-item"><a href="admin-movies.html" class="nav-link"><span>🎬</span> Movies</a></li>
+                    <li class="nav-item"><a href="admin-theatres.html" class="nav-link"><span>🏛️</span> Theatres</a></li>
+                    <li class="nav-item"><a href="admin-shows.html" class="nav-link"><span>🎭</span> Shows</a></li>
+                    <li class="nav-item"><a href="admin-bookings.html" class="nav-link"><span>📋</span> Bookings</a></li>
+                    <li class="nav-item"><a href="admin-users.html" class="nav-link active"><span>👥</span> Users</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-bottom" style="padding: 1.5rem;">
+                <button onclick="Api.logout()" class="nav-link" style="width: 100%; border: none; cursor: pointer; background:rgba(229,9,20,0.1); color:var(--primary);">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="header"><h1>Registered Users</h1></header>
+            <div class="data-card"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined Date</th></tr></thead><tbody id="userTable"></tbody></table></div>
+        </main>
+    </div>
+    <script src="js/api.js"></script><script src="js/admin.js"></script>
+    <script>
+        async function load() {
+            try {
+                const data = await AdminApi.getUsers();
+                const tbody = document.getElementById('userTable');
+                tbody.innerHTML = '';
+                data.forEach(u => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${u.name}</td><td>${u.email}</td><td><span class="badge" style="background:#eee;color:#333;">${u.role}</span></td><td>${new Date(u.created_at).toLocaleDateString()}</td>`;
+                    tbody.appendChild(tr);
+                });
+            } catch(e){}
+        }
+        load();
+    </script>
+</body>
+</html>

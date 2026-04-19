@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Show | CineTick</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .page-header { background: rgba(17, 17, 17, 0.4); backdrop-filter: blur(20px); padding: 4rem 0; border-bottom: 1px solid var(--border); margin-bottom: 3rem; }
+        .shows-container { max-width: 900px; margin: 0 auto; padding: 0 20px 100px; }
+        .show-card { 
+            background: var(--bg-card); padding: 2rem; border-radius: 16px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 1rem; border: 1px solid var(--border); transition: var(--transition);
+        }
+        .show-card:hover { transform: translateY(-5px); border-color: var(--primary); background: #151515; }
+        .show-time { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+    </style>
+</head>
+<body>
+    <div id="loader" class="loader-container"><div class="loader"></div></div>
+    
+    <!-- Background Poster -->
+    <div class="poster-bg">
+        <img id="pageBackdrop" src="" alt="" referrerpolicy="no-referrer">
+    </div>
+
+    <nav id="navbar" class="scrolled">
+        <div class="logo"><a href="index.html" style="text-decoration:none; color:inherit;">CineTick</a></div>
+        <div class="nav-links nav-right"></div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container" style="display:flex; align-items:center; gap:2rem;">
+            <img id="moviePoster" src="" style="width:100px; height:150px; border-radius:10px; object-fit:cover; border:1px solid var(--border);" referrerpolicy="no-referrer">
+            <div>
+                <h1 id="movieTitle" style="font-size: 2.5rem; margin-bottom: 0.5rem;">Select Your Show</h1>
+                <p id="movieMeta" style="color:var(--text-gray);"></p>
+            </div>
+        </div>
+    </div>
+
+    <main class="shows-container">
+        <div id="showsList"></div>
+    </main>
+
+    <div id="toast"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const movieId = urlParams.get('id');
+        if (!movieId) window.location.href = 'index.html';
+
+        async function loadContent() {
+            try {
+                // Fetch Movie Info
+                const movie = await Api.getMovieDetails(movieId);
+                const proxyUrl = `http://localhost:5000/api/proxy/image?url=${encodeURIComponent(movie.poster_url)}`;
+                
+                document.getElementById('moviePoster').src = proxyUrl;
+                document.getElementById('pageBackdrop').src = proxyUrl;
+                document.getElementById('movieTitle').textContent = `Book ${movie.title}`;
+                document.getElementById('movieMeta').textContent = `${movie.genre} • ${movie.duration_mins} mins • ${movie.language}`;
+
+                // Fetch Shows
+                const shows = await Api.getMovieShows(movieId);
+                const container = document.getElementById('showsList');
+                
+                if (shows.length === 0) {
+                    container.innerHTML = `<div style="text-align:center; padding: 4rem; opacity: 0.5;"><p>No shows scheduled today.</p></div>`;
+                    return;
+                }
+
+                shows.forEach(show => {
+                    const card = document.createElement('div');
+                    card.className = 'show-card';
+                    card.innerHTML = `
+                        <div>
+                            <div class="show-time">${new Date(show.show_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                            <div style="color:var(--text-gray); font-size: 0.9rem; margin-top: 5px;">🏛 ${show.theatre_name} • ${show.location}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="color:var(--text-gray); font-size: 0.9rem; margin-bottom: 0.5rem;">Starts from ₹${show.price_base}</div>
+                            <button onclick="selectShow(${show.show_id})" class="btn btn-primary" style="padding: 0.8rem 2rem; border-radius: 12px; font-weight:700;">BOOK NOW</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) { console.error(err); } finally { document.getElementById('loader').style.display = 'none'; }
+        }
+
+        function selectShow(showId) {
+            if (!Api.isLoggedIn()) {
+                showToast('Please login to continue', true);
+                setTimeout(() => window.location.href = 'login.html', 1500);
+            } else {
+                window.location.href = `seats.html?id=${showId}`;
+            }
+        }
+        loadContent();
+    </script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Bookings | CineTick Admin</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div id="loader" class="loader-container"><div class="loader"></div></div>
+
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <div class="logo">CineTick</div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="admin-dashboard.html" class="nav-link"><span>📊</span> Dashboard</a></li>
+                    <li class="nav-item"><a href="admin-movies.html" class="nav-link"><span>🎬</span> Movies</a></li>
+                    <li class="nav-item"><a href="admin-theatres.html" class="nav-link"><span>🏛️</span> Theatres</a></li>
+                    <li class="nav-item"><a href="admin-shows.html" class="nav-link"><span>🎭</span> Shows</a></li>
+                    <li class="nav-item"><a href="admin-bookings.html" class="nav-link active"><span>📋</span> Bookings</a></li>
+                    <li class="nav-item"><a href="admin-users.html" class="nav-link"><span>👥</span> Users</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-bottom" style="padding: 1.5rem;">
+                <button onclick="Api.logout()" class="nav-link" style="width: 100%; border: none; cursor: pointer; background: rgba(229, 9, 20, 0.1); color: var(--primary);">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>Booking Transactions</h1>
+                <div class="user-profile">
+                    <div class="avatar">A</div>
+                    <span>Administrator</span>
+                </div>
+            </header>
+
+            <div class="data-card">
+                <div class="card-header">
+                    <h2>Recent Bookings & Status</h2>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>User Details</th>
+                                <th>Movie & Theatre</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingTable">
+                            <!-- Loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        async function loadBookings() {
+            try {
+                const data = await AdminApi.getBookings();
+                const tbody = document.getElementById('bookingTable');
+                tbody.innerHTML = '';
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:3rem; opacity:0.5;">No bookings found in system.</td></tr>';
+                    return;
+                }
+
+                data.forEach(b => {
+                    const statusClass = b.booking_status.toLowerCase() === 'confirmed' ? 'badge-confirmed' : 'badge-pending';
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-family:monospace; font-weight:700;">#${b.booking_id}</td>
+                        <td>
+                            <div style="font-weight:600;">${b.user_name}</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">${b.email || 'No Email'}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight:600; color:var(--primary);">${b.movie_title}</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">${b.theatre_name}</div>
+                        </td>
+                        <td style="font-weight:700;">₹${parseFloat(b.total_amount).toFixed(2)}</td>
+                        <td><span class="badge ${statusClass}">${b.booking_status}</span></td>
+                        <td>
+                            ${b.booking_status !== 'Cancelled' ? 
+                                `<button onclick="cancelBooking(${b.booking_id})" class="btn-delete" style="font-size:0.75rem;">Cancel Ticket</button>` : 
+                                `<span style="font-size:0.8rem; color:var(--text-muted);">Voided</span>`
+                            }
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error(err);
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+
+        async function cancelBooking(id) {
+            if (confirm('Are you sure you want to cancel this booking? This will mark the transaction as void.')) {
+                try {
+                    await AdminApi.cancelBooking(id);
+                    loadBookings();
+                } catch (err) {
+                    alert(err.message);
+                }
+            }
+        }
+
+        loadBookings();
+    </script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | CineTick</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <div class="logo">CineTick</div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="admin-dashboard.html" class="nav-link active"><span>📊</span> Dashboard</a></li>
+                    <li class="nav-item"><a href="admin-movies.html" class="nav-link"><span>🎬</span> Movies</a></li>
+                    <li class="nav-item"><a href="admin-theatres.html" class="nav-link"><span>🏛️</span> Theatres</a></li>
+                    <li class="nav-item"><a href="admin-shows.html" class="nav-link"><span>🎭</span> Shows</a></li>
+                    <li class="nav-item"><a href="admin-bookings.html" class="nav-link"><span>📋</span> Bookings</a></li>
+                    <li class="nav-item"><a href="admin-users.html" class="nav-link"><span>👥</span> Users</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-bottom" style="padding: 1.5rem;">
+                <button onclick="Api.logout()" class="nav-link" style="width: 100%; border: none; cursor: pointer; background:rgba(229,9,20,0.1); color:var(--primary);">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>Dashboard Overview</h1>
+                <div class="user-profile">
+                    <div class="avatar" id="adminInitial">A</div>
+                    <span id="adminName">Administrator</span>
+                </div>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Total Revenue</span>
+                    <div class="stat-value" id="statRevenue">₹0</div>
+                    <div class="stat-trend">↑ 12% from last month</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Total Bookings</span>
+                    <div class="stat-value" id="statBookings">0</div>
+                    <div class="stat-trend">↑ 5% new bookings</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Registered Users</span>
+                    <div class="stat-value" id="statUsers">0</div>
+                    <div class="stat-trend">Active users</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Movies Showing</span>
+                    <div class="stat-value" id="statMovies">0</div>
+                    <div class="stat-trend">Across all theatres</div>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <div class="card-header">
+                    <h2>Recent Bookings</h2>
+                    <button class="btn-primary" style="padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.8rem;" onclick="location.href='admin-bookings.html'">View All</button>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Movie</th>
+                            <th>Theatre</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentBookings">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        // Auth check
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user || user.role !== 'admin') window.location.href = 'login.html';
+        
+        document.getElementById('adminName').textContent = user.name;
+        document.getElementById('adminInitial').textContent = user.name[0];
+
+        async function loadStats() {
+            try {
+                const stats = await Api.request('/admin/stats_summary');
+                
+                document.getElementById('statMovies').textContent = stats.movies;
+                document.getElementById('statBookings').textContent = stats.bookings;
+                document.getElementById('statUsers').textContent = stats.users;
+                document.getElementById('statRevenue').textContent = `₹${stats.revenue.toLocaleString()}`;
+
+                const history = await Api.request('/admin/bookings');
+                const tbody = document.getElementById('recentBookings');
+                tbody.innerHTML = '';
+                history.slice(0, 5).forEach(b => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${b.user_name}</td>
+                        <td>${b.movie_title}</td>
+                        <td>${b.theatre_name}</td>
+                        <td>₹${b.total_amount}</td>
+                        <td><span class="badge" style="background:var(--primary); padding:4px 10px; border-radius:12px; font-size:0.7rem;">${b.booking_status}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        loadStats();
+    </script>
+</body>
+</html>

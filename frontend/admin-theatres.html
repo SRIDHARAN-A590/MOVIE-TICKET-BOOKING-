@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Theatres | CineTick Admin</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <div class="logo">CineTick</div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="admin-dashboard.html" class="nav-link"><span>📊</span> Dashboard</a></li>
+                    <li class="nav-item"><a href="admin-movies.html" class="nav-link"><span>🎬</span> Movies</a></li>
+                    <li class="nav-item"><a href="admin-theatres.html" class="nav-link active"><span>🏛️</span> Theatres</a></li>
+                    <li class="nav-item"><a href="admin-shows.html" class="nav-link"><span>🎭</span> Shows</a></li>
+                    <li class="nav-item"><a href="admin-bookings.html" class="nav-link"><span>📋</span> Bookings</a></li>
+                    <li class="nav-item"><a href="admin-users.html" class="nav-link"><span>👥</span> Users</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-bottom" style="padding: 1.5rem;">
+                <button onclick="Api.logout()" class="nav-link" style="width: 100%; border: none; cursor: pointer; background:rgba(229,9,20,0.1); color:var(--primary);">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>Theatre Management</h1>
+                <button class="btn-primary" style="padding: 0.8rem 1.5rem; border-radius: 12px;" onclick="openModal('addTheatre')">+ Add Theatre</button>
+            </header>
+
+            <div class="data-card">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Theatre Name</th>
+                            <th>Location</th>
+                            <th>Contact</th>
+                            <th>Screens</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="theatreTable"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="addTheatre" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 2rem;">Add New Theatre</h2>
+            <form id="theatreForm">
+                <div class="form-group"><label>Name</label><input type="text" id="tName" class="form-control" required></div>
+                <div class="form-group"><label>Location</label><input type="text" id="tLocation" class="form-control" required></div>
+                <div class="form-group"><label>Contact</label><input type="text" id="tContact" class="form-control" required></div>
+                <div class="form-group"><label>Total Screens</label><input type="number" id="tScreens" class="form-control" value="1" required></div>
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn-primary" style="flex:1; padding:1rem; border-radius:10px;">Save Theatre</button>
+                    <button type="button" class="btn-outline" style="flex:1; padding:1rem; border-radius:10px;" onclick="closeModal('addTheatre')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script><script src="js/admin.js"></script>
+    <script>
+        async function load() {
+            try {
+                const data = await AdminApi.getTheatres();
+                const tbody = document.getElementById('theatreTable');
+                tbody.innerHTML = '';
+                data.forEach(t => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${t.name}</td><td>${t.location}</td><td>${t.contact_number}</td><td>${t.total_screens}</td><td><button onclick="deleteTheatre(${t.theatre_id})" style="background:none; border:none; color:red; cursor:pointer;">Delete</button></td>`;
+                    tbody.appendChild(tr);
+                });
+            } catch(e){}
+        }
+        document.getElementById('theatreForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = { name: document.getElementById('tName').value, location: document.getElementById('tLocation').value, contact_number: document.getElementById('tContact').value, total_screens: document.getElementById('tScreens').value };
+            await AdminApi.addTheatre(data);
+            closeModal('addTheatre'); load();
+        });
+        async function deleteTheatre(id) { if(confirm('Delete?')) { await AdminApi.deleteTheatre(id); load(); } }
+        load();
+    </script>
+</body>
+</html>

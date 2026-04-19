@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Shows | CineTick Admin</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div id="loader" class="loader-container"><div class="loader"></div></div>
+
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <div class="logo">CineTick</div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="admin-dashboard.html" class="nav-link"><span>📊</span> Dashboard</a></li>
+                    <li class="nav-item"><a href="admin-movies.html" class="nav-link"><span>🎬</span> Movies</a></li>
+                    <li class="nav-item"><a href="admin-theatres.html" class="nav-link"><span>🏛️</span> Theatres</a></li>
+                    <li class="nav-item"><a href="admin-shows.html" class="nav-link active"><span>🎭</span> Shows</a></li>
+                    <li class="nav-item"><a href="admin-bookings.html" class="nav-link"><span>📋</span> Bookings</a></li>
+                    <li class="nav-item"><a href="admin-users.html" class="nav-link"><span>👥</span> Users</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-bottom" style="padding: 1.5rem;">
+                <button onclick="Api.logout()" class="nav-link" style="width: 100%; border: none; cursor: pointer; background: rgba(229, 9, 20, 0.1); color: var(--primary);">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>Show Management</h1>
+                <button class="btn-primary" style="padding: 0.8rem 1.5rem; border-radius:12px;" onclick="openShowModal()">+ Create New Show</button>
+            </header>
+
+            <div class="data-card">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Movie</th>
+                            <th>Theatre</th>
+                            <th>Show Time</th>
+                            <th>Base Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="showTable">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Add/Edit Show -->
+    <div id="showModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle" style="margin-bottom:2rem;">Schedule New Show</h2>
+            <form id="showForm">
+                <input type="hidden" id="editShowId">
+                <div class="form-group">
+                    <label>Movie</label>
+                    <select id="sMovie" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Theatre</label>
+                    <select id="sTheatre" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Show Time</label>
+                    <input type="datetime-local" id="sTime" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Base Price (₹)</label>
+                    <input type="number" id="sPrice" class="form-control" required>
+                </div>
+                <div style="display:flex; gap:1rem; margin-top:2rem;">
+                    <button type="submit" class="btn-primary" style="flex:1; padding:1rem; border-radius:10px;">Save Show</button>
+                    <button type="button" class="btn-delete" style="flex:1; padding:1rem; border-radius:10px;" onclick="closeModal('showModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        let moviesCache = [];
+        let theatresCache = [];
+
+        async function openShowModal(show = null) {
+            try {
+                if (moviesCache.length === 0 || theatresCache.length === 0) {
+                    const [ms, ts] = await Promise.all([Api.getMovies(), AdminApi.getTheatres()]);
+                    moviesCache = ms;
+                    theatresCache = ts;
+                }
+                
+                document.getElementById('sMovie').innerHTML = moviesCache.map(m => `<option value="${m.movie_id}">${m.title}</option>`).join('');
+                document.getElementById('sTheatre').innerHTML = theatresCache.map(t => `<option value="${t.theatre_id}">${t.name}</option>`).join('');
+                
+                if (show) {
+                    document.getElementById('modalTitle').textContent = 'Edit Movie Show';
+                    document.getElementById('editShowId').value = show.show_id;
+                    document.getElementById('sMovie').value = show.movie_id;
+                    document.getElementById('sTheatre').value = show.theatre_id;
+                    
+                    // Format date for datetime-local
+                    const d = new Date(show.show_time);
+                    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                    document.getElementById('sTime').value = d.toISOString().slice(0,16);
+                    document.getElementById('sPrice').value = show.price_base;
+                } else {
+                    document.getElementById('modalTitle').textContent = 'Schedule New Show';
+                    document.getElementById('editShowId').value = '';
+                    document.getElementById('showForm').reset();
+                }
+
+                openModal('showModal');
+            } catch (err) {
+                console.error(err);
+                alert('Failed to load data. Ensure theatres and movies exist.');
+            }
+        }
+        
+        async function load() {
+            try {
+                const data = await AdminApi.getShows();
+                const tbody = document.getElementById('showTable');
+                tbody.innerHTML = '';
+                
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem; opacity:0.5;">No shows scheduled.</td></tr>';
+                    return;
+                }
+                
+                data.forEach(s => {
+                    const tr = document.createElement('tr');
+                    const date = new Date(s.show_time).toLocaleString('en-GB', { 
+                        day: '2-digit', month: 'short', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+                    
+                    tr.innerHTML = `
+                        <td style="font-weight:600;">${s.movie_title}</td>
+                        <td>${s.theatre_name}</td>
+                        <td style="color:var(--primary); font-family:monospace;">${date}</td>
+                        <td style="font-weight:700;">₹${parseFloat(s.price_base).toFixed(2)}</td>
+                        <td>
+                            <div style="display:flex; gap:0.5rem;">
+                                <button onclick='editShow(${JSON.stringify(s)})' class="btn-delete" style="color:#22c55e; border-color:rgba(34,197,94,0.2);">Edit</button>
+                                <button onclick="deleteShow(${s.show_id})" class="btn-delete">Cancel</button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) { console.error(e); }
+            finally { document.getElementById('loader').style.display = 'none'; }
+        }
+
+        function editShow(show) {
+            openShowModal(show);
+        }
+
+        document.getElementById('showForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editShowId').value;
+            const payload = { 
+                movie_id: document.getElementById('sMovie').value, 
+                theatre_id: document.getElementById('sTheatre').value, 
+                show_time: document.getElementById('sTime').value, 
+                price_base: document.getElementById('sPrice').value 
+            };
+
+            try {
+                if (id) {
+                    await AdminApi.updateShow(id, payload);
+                } else {
+                    await AdminApi.addShow(payload);
+                }
+                closeModal('showModal');
+                load();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        async function deleteShow(id) {
+            if(confirm('Are you sure you want to CANCEL this show? This will remove it from the public listing.')) { 
+                try {
+                    await AdminApi.deleteShow(id); 
+                    load(); 
+                } catch(e) { alert(e.message); }
+            } 
+        }
+        
+        load();
+    </script>
+</body>
+</html>

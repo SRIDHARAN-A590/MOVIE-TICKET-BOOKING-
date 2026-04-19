@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineTick | Premium Movie Experience</title>
+    <link rel="stylesheet" href="css/style.css">
+    <meta name="description" content="Book movie tickets online at CineTick - The ultimate cinema experience.">
+</head>
+<body>
+    <div id="loader" class="loader-container"><div class="loader"></div></div>
+
+    <nav id="navbar">
+        <div class="logo">CineTick</div>
+        <div class="nav-links nav-right">
+            <!-- Dynamic links load here via main.js -->
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Experience Cinema Like Never Before.</h1>
+            <p>From the latest blockbusters to independent masterpieces, enjoy a premium viewing experience with state-of-the-art sound and vision.</p>
+            <div class="hero-btns">
+                <a href="#now-showing" class="btn btn-primary">Book Now</a>
+                <a href="#" class="btn btn-outline" onclick="scrollToShows()">Explore Shows</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="now-showing">
+            <div class="section-header">
+                <h2>Now Showing</h2>
+                <div class="filters">
+                    <!-- Future feature: filter by genre/language -->
+                </div>
+            </div>
+            <div id="movies" class="movie-grid">
+                <!-- Movies load here via script -->
+            </div>
+        </section>
+    </main>
+
+    <div id="toast"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 100) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        });
+
+        function scrollToShows() {
+            document.getElementById('now-showing').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function loadMovies() {
+            // Loader is visible by default
+            try {
+                const movies = await Api.getMovies();
+                const container = document.getElementById('movies');
+                container.innerHTML = '';
+                
+                movies.forEach(movie => {
+                    const card = document.createElement('div');
+                    card.className = 'movie-card';
+                    card.onclick = () => window.location.href = `movie.html?id=${movie.movie_id}`;
+                    const posterUrl = `http://localhost:5000/api/proxy/image?url=${encodeURIComponent(movie.poster_url)}`;
+                    card.innerHTML = `
+                        <div class="card-img-wrapper">
+                            <img src="${posterUrl}" alt="${movie.title}" referrerpolicy="no-referrer">
+                            <div class="card-overlay">
+                                <button class="btn btn-primary" style="width:100%" onclick="event.stopPropagation(); handleQuickBook(${movie.movie_id})">Quick Book</button>
+                            </div>
+                        </div>
+                        <div class="card-info">
+                            <div class="card-tags">
+                                <span>${movie.genre}</span>
+                                <span>${movie.language}</span>
+                                <span>${movie.duration_mins}m</span>
+                            </div>
+                            <h3>${movie.title}</h3>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                showToast(error.message, true);
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+        
+        function handleQuickBook(movieId) {
+            if (!Api.isLoggedIn()) {
+                showToast('Please login to continue booking', true);
+                setTimeout(() => window.location.href = 'login.html', 1500);
+            } else {
+                window.location.href = `shows.html?id=${movieId}`;
+            }
+        }
+
+        loadMovies();
+    </script>
+</body>
+</html>
