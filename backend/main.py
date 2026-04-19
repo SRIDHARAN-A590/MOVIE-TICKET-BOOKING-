@@ -49,6 +49,21 @@ def admin_required(f):
 def home():
     return render_template('index.html')
 
+@app.route('/test-db')
+def test_db():
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return "Database connection failed. Check your environment variables.", 500
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM MOVIES LIMIT 5")
+        data = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return str(data)
+    except Exception as e:
+        return f"Error: {str(e)}", 500
+
 # --- AUTH ROUTES ---
 @app.route('/api/auth/register', methods=['POST'])
 def register():
