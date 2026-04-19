@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import mysql.connector
 
 load_dotenv()
 
@@ -8,7 +9,8 @@ def promote():
         host=os.getenv("DB_HOST"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME")
+        database=os.getenv("DB_NAME"),
+        port=int(os.getenv("DB_PORT", "3306"))
     )
     cursor = conn.cursor()
     cursor.execute("UPDATE USERS SET role = 'admin' WHERE email = 'sri@gmail.com'")

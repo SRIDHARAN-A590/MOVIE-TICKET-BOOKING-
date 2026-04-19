@@ -8,7 +8,8 @@ def reset():
     conn = mysql.connector.connect(
         host=os.getenv("DB_HOST"),
         user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD")
+        password=os.getenv("DB_PASSWORD"),
+        port=int(os.getenv("DB_PORT", "3306"))
     )
     cursor = conn.cursor()
     cursor.execute("DROP DATABASE IF EXISTS movie_booking_system")

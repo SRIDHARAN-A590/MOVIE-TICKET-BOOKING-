@@ -9,6 +9,7 @@ def get_db_connection():
     user = os.getenv("DB_USER")
     password = os.getenv("DB_PASSWORD")
     database = os.getenv("DB_NAME")
+    port = os.getenv("DB_PORT", "3306")
 
     if not all([host, user, database]):
         print("CRITICAL: Missing Database Environment Variables (DB_HOST, DB_USER, or DB_NAME)")
@@ -19,7 +20,8 @@ def get_db_connection():
             host=host,
             user=user,
             password=password,
-            database=database
+            database=database,
+            port=int(port)
         )
         return conn
     except mysql.connector.Error as err:
