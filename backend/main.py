@@ -80,16 +80,8 @@ def proxy_image():
     if not url: return jsonify({'message': 'URL missing'}), 400
     return movie_controller.proxy_image(url)
 
-# Admin Routes
-@app.route('/api/admin/stats_summary')
-@admin_required
-def get_admin_stats_summary(user_id):
-    return admin_controller.admin_get_stats()
+# Admin Routes (Consolidated below)
 
-@app.route('/api/admin/users')
-@admin_required
-def get_admin_users():
-    return admin_controller.admin_get_users()
 
 # --- MOVIE ROUTES (Public) ---
 @app.route('/api/movies', methods=['GET'])

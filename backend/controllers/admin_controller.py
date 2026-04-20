@@ -207,7 +207,7 @@ def get_admin_bookings():
             JOIN SHOWS s ON b.show_id = s.show_id
             JOIN MOVIES m ON s.movie_id = m.movie_id
             JOIN THEATRE t ON s.theatre_id = t.theatre_id
-            ORDER BY b.created_at DESC
+            ORDER BY b.booking_time DESC
         """
         cursor.execute(query)
         res = cursor.fetchall()

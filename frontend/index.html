@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,11 @@
     <link rel="stylesheet" href="css/style.css">
     <meta name="description" content="Book movie tickets online at CineTick - The ultimate cinema experience.">
 </head>
+
 <body>
-    <div id="loader" class="loader-container"><div class="loader"></div></div>
+    <div id="loader" class="loader-container">
+        <div class="loader"></div>
+    </div>
 
     <nav id="navbar">
         <div class="logo">CineTick</div>
@@ -20,7 +24,8 @@
     <header class="hero">
         <div class="hero-content">
             <h1>Experience Cinema Like Never Before.</h1>
-            <p>From the latest blockbusters to independent masterpieces, enjoy a premium viewing experience with state-of-the-art sound and vision.</p>
+            <p>From the latest blockbusters to independent masterpieces, enjoy a premium viewing experience with
+                state-of-the-art sound and vision.</p>
             <div class="hero-btns">
                 <a href="#now-showing" class="btn btn-primary">Book Now</a>
                 <a href="#" class="btn btn-outline" onclick="scrollToShows()">Explore Shows</a>
@@ -64,7 +69,7 @@
                 const movies = await Api.getMovies();
                 const container = document.getElementById('movies');
                 container.innerHTML = '';
-                
+
                 movies.forEach(movie => {
                     const card = document.createElement('div');
                     card.className = 'movie-card';
@@ -94,7 +99,7 @@
                 document.getElementById('loader').style.display = 'none';
             }
         }
-        
+
         function handleQuickBook(movieId) {
             if (!Api.isLoggedIn()) {
                 showToast('Please login to continue booking', true);
@@ -107,4 +112,5 @@
         loadMovies();
     </script>
 </body>
+
 </html>
