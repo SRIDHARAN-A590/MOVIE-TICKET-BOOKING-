@@ -262,7 +262,23 @@ section { padding: 4rem 5%; }
 .seat.available { background: transparent; }
 .seat.available:hover { background: rgba(255,255,255,0.1); transform: scale(1.1); }
 .seat.selected { background: var(--primary); border-color: var(--primary); color: white; transform: scale(1.1); box-shadow: 0 0 15px var(--primary); }
-.seat.booked { background: #333; color: #666; cursor: not-allowed; border: none; }
+.seat.booked { 
+    background: #2a2a2a; 
+    color: #555; 
+    cursor: not-allowed; 
+    border: 1px solid #3a3a3a;
+    position: relative;
+    overflow: hidden;
+}
+.seat.booked::after {
+    content: '✕';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.9rem;
+    color: #555;
+    pointer-events: none;
+}
 
 /* Seat Type Colors */
 .seat[data-type="Platinum"] { border-color: #ff9800; }

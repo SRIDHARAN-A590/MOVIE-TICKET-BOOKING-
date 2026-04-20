@@ -14,9 +14,10 @@ def get_stats():
         cursor.execute("SELECT COUNT(*) as count FROM THEATRE")
         t_count = cursor.fetchone()['count']
         cursor.execute("SELECT COUNT(*) as count FROM USERS")
+        u_count = cursor.fetchone()['count']
         cursor.execute("SELECT COUNT(*) as count FROM BOOKING")
         b_count = cursor.fetchone()['count']
-        cursor.execute("SELECT SUM(total_amount) as revenue FROM BOOKING")
+        cursor.execute("SELECT SUM(total_amount) as revenue FROM BOOKING WHERE booking_status = 'Confirmed'")
         total_rev = cursor.fetchone()['revenue'] or 0
         
         return jsonify({
