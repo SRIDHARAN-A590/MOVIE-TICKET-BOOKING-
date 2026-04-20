@@ -130,6 +130,11 @@ def cancel_booking(current_user, booking_id):
 def admin_stats(_):
     return admin_controller.get_stats()
 
+@app.route('/api/admin/stats_summary', methods=['GET'])
+@admin_required
+def admin_stats_summary(_):
+    return admin_controller.admin_get_stats()
+
 # Movies CRUD
 @app.route('/api/admin/movies', methods=['POST'])
 @admin_required

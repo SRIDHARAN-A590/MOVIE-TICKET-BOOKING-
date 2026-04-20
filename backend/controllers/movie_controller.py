@@ -64,7 +64,7 @@ def get_movie_shows(movie_id):
             SELECT s.show_id, s.show_time, s.price_base, t.name as theatre_name, t.location 
             FROM SHOWS s
             JOIN THEATRE t ON s.theatre_id = t.theatre_id
-            WHERE s.movie_id = %s AND s.show_time > NOW()
+            WHERE s.movie_id = %s AND s.show_time > DATE_SUB(NOW(), INTERVAL 2 HOUR)
             ORDER BY s.show_time ASC
         """
         cursor.execute(query, (movie_id,))

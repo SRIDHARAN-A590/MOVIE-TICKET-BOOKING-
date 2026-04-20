@@ -14,7 +14,8 @@ def get_stats():
         cursor.execute("SELECT COUNT(*) as count FROM THEATRE")
         t_count = cursor.fetchone()['count']
         cursor.execute("SELECT COUNT(*) as count FROM USERS")
-        u_count = cursor.fetchone()['count']
+        cursor.execute("SELECT COUNT(*) as count FROM BOOKING")
+        b_count = cursor.fetchone()['count']
         cursor.execute("SELECT SUM(total_amount) as revenue FROM BOOKING")
         total_rev = cursor.fetchone()['revenue'] or 0
         
@@ -22,6 +23,7 @@ def get_stats():
             'movies': m_count,
             'theatres': t_count,
             'users': u_count,
+            'bookings': b_count,
             'revenue': float(total_rev)
         }), 200
     except Exception as e:
@@ -151,16 +153,43 @@ def add_show(data):
     try:
         conn = get_db_connection()
         if not conn:
-            return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
+            return jsonify({'message': 'Database connection error'}), 500
         cursor = conn.cursor()
+        
+        # 1. Insert Show
         cursor.execute("INSERT INTO SHOWS (movie_id, theatre_id, show_time, price_base) VALUES (%s, %s, %s, %s)",
                        (data['movie_id'], data['theatre_id'], data['show_time'], data['price_base']))
+        show_id = cursor.lastrowid
+        
+        # 2. Populate Seats
+        total_seats = int(data.get('total_seats', 50))
+        seats_per_row = 10
+        seat_insert_data = []
+        
+        for i in range(total_seats):
+            row_char = chr(65 + (i // seats_per_row)) # A, B, C...
+            num = (i % seats_per_row) + 1
+            seat_number = f"{row_char}{num}"
+            
+            # Simplified seat types: first 2 rows Gold, rest Silver
+            seat_type = 'Gold' if (i // seats_per_row) < 2 else 'Silver'
+            multiplier = 1.5 if seat_type == 'Gold' else 1.0
+            
+            seat_insert_data.append((show_id, seat_number, seat_type, 'Available', multiplier))
+            
+        cursor.executemany("""
+            INSERT INTO SEAT (show_id, seat_number, seat_type, status, price_multiplier)
+            VALUES (%s, %s, %s, %s, %s)
+        """, seat_insert_data)
+        
         conn.commit()
-        return jsonify({'message': 'Show scheduled successfully'}), 201
+        return jsonify({'message': f'Show scheduled with {total_seats} seats successfully'}), 201
     except Exception as e:
+        if 'conn' in locals() and conn: conn.rollback()
         return jsonify({'message': str(e)}), 500
     finally:
         if 'conn' in locals() and conn: conn.close()
+
 
 def delete_show(show_id):
     try:

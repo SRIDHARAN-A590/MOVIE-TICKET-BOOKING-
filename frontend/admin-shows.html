@@ -76,6 +76,11 @@
                     <label>Base Price (₹)</label>
                     <input type="number" id="sPrice" class="form-control" required>
                 </div>
+                <div class="form-group">
+                    <label>Total Seats Available</label>
+                    <input type="number" id="sTotalSeats" class="form-control" placeholder="Default: 50" min="1" max="200">
+                    <small style="color:var(--text-gray); font-size:0.75rem;">This will automatically generate seats for the show.</small>
+                </div>
                 <div style="display:flex; gap:1rem; margin-top:2rem;">
                     <button type="submit" class="btn-primary" style="flex:1; padding:1rem; border-radius:10px;">Save Show</button>
                     <button type="button" class="btn-delete" style="flex:1; padding:1rem; border-radius:10px;" onclick="closeModal('showModal')">Cancel</button>
@@ -174,7 +179,8 @@
                 movie_id: document.getElementById('sMovie').value, 
                 theatre_id: document.getElementById('sTheatre').value, 
                 show_time: document.getElementById('sTime').value, 
-                price_base: document.getElementById('sPrice').value 
+                price_base: document.getElementById('sPrice').value,
+                total_seats: document.getElementById('sTotalSeats').value || 50
             };
 
             try {
