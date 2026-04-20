@@ -76,20 +76,17 @@
         }
 
         async function proceedToPayment() {
-            const tax = rawTotal * 0.18;
-            const final = rawTotal + tax + 25;
-            
             try {
-                // First create the booking (pending state)
+                // Backend calculates the true final amount (with discount, tax, and fee)
                 const res = await Api.request('/bookings', 'POST', {
                     show_id: showId,
                     seat_ids: seatIds.split(',').map(Number),
-                    total_amount: final
+                    total_amount: rawTotal  // fallback; backend recalculates authoritatively
                 });
                 
-                // Get poster url from current backdrop
                 const posterUrl = document.getElementById('pageBackdrop').src.split('url=')[1];
-                window.location.href = `payment.html?bookingId=${res.booking_id}&amount=${final}&poster=${posterUrl}`;
+                // Use backend's amount_paid — single source of truth
+                window.location.href = `payment.html?bookingId=${res.booking_id}&amount=${res.amount_paid}&poster=${posterUrl}`;
             } catch (err) {
                 showToast(err.message, true);
             }

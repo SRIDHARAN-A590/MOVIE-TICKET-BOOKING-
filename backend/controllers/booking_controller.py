@@ -33,9 +33,14 @@ def create_booking(user_id, data):
         discount = cursor.fetchone()['discount']
         final_amount = float(total_amount) - float(discount)
         
-        # Create Booking
+        # Apply fee and tax to match frontend display
+        CONVENIENCE_FEE = 25.0
+        tax = round(final_amount * 0.18, 2)
+        grand_total = round(final_amount + tax + CONVENIENCE_FEE, 2)
+
+        # Create Booking with grand total
         cursor.execute("INSERT INTO BOOKING (user_id, show_id, total_amount, booking_status) VALUES (%s, %s, %s, 'Confirmed')", 
-                       (user_id, show_id, final_amount))
+                       (user_id, show_id, grand_total))
         booking_id = cursor.lastrowid
         
         # Insert Booking Seats (This will fire the Trigger to update seat status)
@@ -47,8 +52,8 @@ def create_booking(user_id, data):
         return jsonify({
             'message': 'Booking successful', 
             'booking_id': booking_id, 
-            'amount_paid': final_amount,
-            'discount_applied': discount
+            'amount_paid': grand_total,
+            'discount_applied': float(discount)
         }), 201
         
     except Exception as e:
@@ -79,9 +84,20 @@ def make_payment(user_id, data):
             'Net Banking': 'Net Banking'
         }
         actual_method = method_map.get(payment_method, 'Credit Card')
+        
+        # Use the booking's stored amount (source of truth)
+        cursor.execute("SELECT total_amount FROM BOOKING WHERE booking_id = %s", (booking_id,))
+        booking_row = cursor.fetchone()
+        final_amount = float(booking_row['total_amount']) if booking_row else float(amount)
+
+        # Check if payment already recorded (prevent duplicate entry error)
+        cursor.execute("SELECT payment_id FROM PAYMENT WHERE booking_id = %s", (booking_id,))
+        existing = cursor.fetchone()
+        if existing:
+            return jsonify({'message': 'Payment already recorded for this booking'}), 200
             
         cursor.execute("INSERT INTO PAYMENT (booking_id, amount, payment_method, payment_status) VALUES (%s, %s, %s, 'Success')",
-                       (booking_id, amount, actual_method))
+                       (booking_id, final_amount, actual_method))
         conn.commit()
         return jsonify({'message': 'Payment successful'}), 200
         
