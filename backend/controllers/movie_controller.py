@@ -61,10 +61,17 @@ def get_movie_shows(movie_id):
             return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
         query = """
-            SELECT s.show_id, s.show_time, s.price_base, t.name as theatre_name, t.location 
+            SELECT 
+                s.show_id, s.show_time, s.price_base, 
+                t.name as theatre_name, t.location,
+                COUNT(st.seat_id) as total_seats,
+                SUM(CASE WHEN st.status = 'Booked' THEN 1 ELSE 0 END) as booked_seats,
+                SUM(CASE WHEN st.status = 'Available' THEN 1 ELSE 0 END) as available_seats
             FROM SHOWS s
             JOIN THEATRE t ON s.theatre_id = t.theatre_id
+            LEFT JOIN SEAT st ON s.show_id = st.show_id
             WHERE s.movie_id = %s AND s.show_time > DATE_SUB(NOW(), INTERVAL 2 HOUR)
+            GROUP BY s.show_id, s.show_time, s.price_base, t.name, t.location
             ORDER BY s.show_time ASC
         """
         cursor.execute(query, (movie_id,))

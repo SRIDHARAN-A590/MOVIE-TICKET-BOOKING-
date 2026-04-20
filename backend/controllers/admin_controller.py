@@ -135,10 +135,18 @@ def get_all_shows():
             return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
         query = """
-            SELECT s.*, m.title as movie_title, t.name as theatre_name 
+            SELECT 
+                s.*,
+                m.title as movie_title, 
+                t.name as theatre_name,
+                COUNT(st.seat_id) as total_seats,
+                SUM(CASE WHEN st.status = 'Booked' THEN 1 ELSE 0 END) as booked_seats,
+                SUM(CASE WHEN st.status = 'Available' THEN 1 ELSE 0 END) as available_seats
             FROM SHOWS s
             JOIN MOVIES m ON s.movie_id = m.movie_id
             JOIN THEATRE t ON s.theatre_id = t.theatre_id
+            LEFT JOIN SEAT st ON s.show_id = st.show_id
+            GROUP BY s.show_id, m.title, t.name
             ORDER BY s.show_time DESC
         """
         cursor.execute(query)
@@ -148,6 +156,7 @@ def get_all_shows():
         return jsonify({'message': str(e)}), 500
     finally:
         if 'conn' in locals() and conn: conn.close()
+
 
 def add_show(data):
     try:

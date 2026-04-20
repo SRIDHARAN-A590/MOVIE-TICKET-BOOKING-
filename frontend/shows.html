@@ -76,14 +76,38 @@
                 shows.forEach(show => {
                     const card = document.createElement('div');
                     card.className = 'show-card';
+                    const total = show.total_seats || 0;
+                    const available = show.available_seats || 0;
+                    const booked = show.booked_seats || 0;
+                    const occupancyPct = total > 0 ? Math.round((booked / total) * 100) : 0;
+                    const isFull = available === 0 && total > 0;
+                    const barColor = occupancyPct > 80 ? '#ef4444' : occupancyPct > 50 ? '#f97316' : '#22c55e';
+
                     card.innerHTML = `
                         <div>
                             <div class="show-time">${new Date(show.show_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
                             <div style="color:var(--text-gray); font-size: 0.9rem; margin-top: 5px;">🏛 ${show.theatre_name} • ${show.location}</div>
+                            <div style="margin-top:12px; display:flex; gap:1rem; flex-wrap:wrap;">
+                                <span style="font-size:0.8rem; background:rgba(255,255,255,0.07); padding:3px 10px; border-radius:20px;">
+                                    🪑 Total: <strong>${total}</strong>
+                                </span>
+                                <span style="font-size:0.8rem; background:rgba(34,197,94,0.12); color:#22c55e; padding:3px 10px; border-radius:20px;">
+                                    ✅ Available: <strong>${available}</strong>
+                                </span>
+                                <span style="font-size:0.8rem; background:rgba(229,9,20,0.12); color:#f87171; padding:3px 10px; border-radius:20px;">
+                                    🔒 Booked: <strong>${booked}</strong>
+                                </span>
+                            </div>
+                            <div style="margin-top:8px; height:4px; border-radius:4px; background:rgba(255,255,255,0.08); width:220px; overflow:hidden;">
+                                <div style="height:100%; width:${occupancyPct}%; background:${barColor}; border-radius:4px; transition:width 0.6s;"></div>
+                            </div>
                         </div>
                         <div style="text-align:right;">
                             <div style="color:var(--text-gray); font-size: 0.9rem; margin-bottom: 0.5rem;">Starts from ₹${show.price_base}</div>
-                            <button onclick="selectShow(${show.show_id})" class="btn btn-primary" style="padding: 0.8rem 2rem; border-radius: 12px; font-weight:700;">BOOK NOW</button>
+                            ${isFull
+                                ? `<button disabled class="btn btn-primary" style="padding:0.8rem 2rem; border-radius:12px; font-weight:700; opacity:0.5; cursor:not-allowed;">SOLD OUT</button>`
+                                : `<button onclick="selectShow(${show.show_id})" class="btn btn-primary" style="padding:0.8rem 2rem; border-radius:12px; font-weight:700;">BOOK NOW</button>`
+                            }
                         </div>
                     `;
                     container.appendChild(card);
