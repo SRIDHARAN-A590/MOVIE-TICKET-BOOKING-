@@ -34,7 +34,7 @@ INSERT INTO MOVIES (title, description, duration_mins, genre, language, release_
 ('Animal', 'Family, blood, and fury.', 201, 'Drama', 'Hindi', '2023-12-01', 'https://m.media-amazon.com/images/M/MV5BZThmNDg1NjUtNWJhMC00YjA3LWJiMjItNmM4ZDQ5ZGZiN2Y2XkEyXkFqcGc@._V1_.jpg'),
 ('Pushpa: The Rise', 'Sandalwood smuggler.', 179, 'Action', 'Telugu', '2021-12-17', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR43EpXkB8hyRy47_DBdbZI3kmLMxn7dJdjOA&s'),
 ('Vikram', 'The high-octane thriller.', 175, 'Action', 'Tamil', '2022-06-03', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQG_4DuNSmYs7fdFTTDdE1TZYwoMYk-RLuNjw&s'),
-('Kantara', 'Divine justice.', 148, 'Thriller', 'Kannada', '2022-09-30', 'https://bloodybrilliant.in/wp-content/uploads/2022/10/Kantara.webp'),
+('Kantara', 'Divine justice.', 148, 'Thriller', 'Kannada', '2022-09-30', 'https://i0.wp.com/ficklesorts.com/wp-content/uploads/2024/04/kantara-featured.jpg?fit=1200%2C675&ssl=1'),
 ('Varanasi', 'Mahesh Babu in Rajamouli epic.', 175, 'Adventure', 'Hindi', '2026-07-21', 'https://static.wixstatic.com/media/7c2249_51148a1641404be8b2c70f0d6a9c6905~mv2.jpg/v1/fill/w_672,h_448,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/7c2249_51148a1641404be8b2c70f0d6a9c6905~mv2.jpg'),
 ('Jana Nayagan', 'The final leadership.', 165, 'Political', 'Tamil', '2025-11-15', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnlzkOimq2QTp4A0Nbet25xwcy0nr2wmVYDg&s'),
 ('Ponniyin Selvan: I', 'Chola empire struggle.', 167, 'Drama', 'Tamil', '2022-09-30', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLPg2otOG3aIP21sU4QB3vMKiS2WLHvnjnWQ&s'),

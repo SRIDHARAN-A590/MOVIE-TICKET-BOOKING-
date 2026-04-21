@@ -19,7 +19,7 @@ RELIABLE_POSTERS = {
     "Animal": "https://m.media-amazon.com/images/M/MV5BZThmNDg1NjUtNWJhMC00YjA3LWJiMjItNmM4ZDQ5ZGZiN2Y2XkEyXkFqcGc@._V1_.jpg",
     "Pushpa: The Rise": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR43EpXkB8hyRy47_DBdbZI3kmLMxn7dJdjOA&s",
     "Vikram": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQG_4DuNSmYs7fdFTTDdE1TZYwoMYk-RLuNjw&s",
-    "Kantara": "https://bloodybrilliant.in/wp-content/uploads/2022/10/Kantara.webp",
+    "Kantara": "https://i0.wp.com/ficklesorts.com/wp-content/uploads/2024/04/kantara-featured.jpg?fit=1200%2C675&ssl=1",
     "Varanasi": "https://static.wixstatic.com/media/7c2249_51148a1641404be8b2c70f0d6a9c6905~mv2.jpg/v1/fill/w_672,h_448,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/7c2249_51148a1641404be8b2c70f0d6a9c6905~mv2.jpg",
     "Jana Nayagan": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnlzkOimq2QTp4A0Nbet25xwcy0nr2wmVYDg&s",
     "Ponniyin Selvan: I": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLPg2otOG3aIP21sU4QB3vMKiS2WLHvnjnWQ&s",
