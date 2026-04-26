@@ -37,15 +37,38 @@
             </header>
 
             <div class="stats-grid">
+                <!-- Revenue Card with Period Dropdown -->
                 <div class="stat-card">
-                    <span class="stat-label">Total Revenue</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                        <span class="stat-label">Revenue</span>
+                        <select id="revenuePeriod" onchange="loadRevenue()" style="
+                            background: #e50914;
+                            color: #fff;
+                            border: none;
+                            border-radius: 8px;
+                            padding: 5px 12px;
+                            font-size: 0.75rem;
+                            font-weight: 600;
+                            cursor: pointer;
+                            outline: none;
+                            appearance: none;
+                            -webkit-appearance: none;
+                            box-shadow: 0 2px 8px rgba(229,9,20,0.4);
+                        ">
+                            <option value="all"   style="background:#1a1a2e; color:#fff;">All Time</option>
+                            <option value="today" style="background:#1a1a2e; color:#fff;">Today</option>
+                            <option value="month" style="background:#1a1a2e; color:#fff;">This Month</option>
+                            <option value="year"  style="background:#1a1a2e; color:#fff;">This Year</option>
+                        </select>
+                    </div>
                     <div class="stat-value" id="statRevenue">₹0</div>
-                    <div class="stat-trend">↑ 12% from last month</div>
+                    <div class="stat-trend" id="revenuePeriodLabel">↑ All time revenue</div>
                 </div>
+
                 <div class="stat-card">
                     <span class="stat-label">Total Bookings</span>
                     <div class="stat-value" id="statBookings">0</div>
-                    <div class="stat-trend">↑ 5% new bookings</div>
+                    <div class="stat-trend">↑ New bookings</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-label">Registered Users</span>
@@ -87,37 +110,90 @@
         // Auth check
         const user = JSON.parse(localStorage.getItem('user'));
         if (!user || user.role !== 'admin') window.location.href = 'login.html';
-        
+
         document.getElementById('adminName').textContent = user.name;
         document.getElementById('adminInitial').textContent = user.name[0];
 
+        // Badge color by status
+        function badgeColor(status) {
+            if (!status) return '#555';
+            const s = status.toLowerCase();
+            if (s === 'confirmed') return '#22c55e';
+            if (s === 'cancelled') return '#e50914';
+            if (s === 'pending')   return '#f59e0b';
+            return '#555';
+        }
+
+        // Load revenue by selected period
+        async function loadRevenue() {
+            const period = document.getElementById('revenuePeriod').value;
+            try {
+                const data = await Api.request(`/admin/revenue?period=${period}`);
+                document.getElementById('statRevenue').textContent =
+                    `₹${Number(data.revenue).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+                document.getElementById('revenuePeriodLabel').textContent =
+                    `↑ ${data.period} · ${data.bookings} confirmed booking(s)`;
+            } catch (err) {
+                document.getElementById('statRevenue').textContent = '₹0';
+                document.getElementById('revenuePeriodLabel').textContent = 'Could not load revenue';
+            }
+        }
+
+        // Load dashboard stats + recent bookings
         async function loadStats() {
             try {
                 const stats = await Api.request('/admin/stats_summary');
-                
-                document.getElementById('statMovies').textContent = stats.movies;
+                document.getElementById('statMovies').textContent   = stats.movies;
                 document.getElementById('statBookings').textContent = stats.bookings;
-                document.getElementById('statUsers').textContent = stats.users;
-                document.getElementById('statRevenue').textContent = `₹${stats.revenue.toLocaleString()}`;
+                document.getElementById('statUsers').textContent    = stats.users;
+            } catch (err) {
+                console.error('Stats load error:', err);
+            }
 
+            try {
                 const history = await Api.request('/admin/bookings');
                 const tbody = document.getElementById('recentBookings');
                 tbody.innerHTML = '';
+
+                if (!history || history.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#888; padding:2rem;">No bookings found</td></tr>`;
+                    return;
+                }
+
                 history.slice(0, 5).forEach(b => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td>${b.user_name}</td>
-                        <td>${b.movie_title}</td>
-                        <td>${b.theatre_name}</td>
-                        <td>₹${b.total_amount}</td>
-                        <td><span class="badge" style="background:var(--primary); padding:4px 10px; border-radius:12px; font-size:0.7rem;">${b.booking_status}</span></td>
+                        <td>
+                            <div style="font-weight:600;">${b.user_name || '—'}</div>
+                            <small style="color:#888;">${b.email || ''}</small>
+                        </td>
+                        <td style="color:var(--primary); font-weight:600;">${b.movie_title || '—'}</td>
+                        <td>${b.theatre_name || '—'}</td>
+                        <td>₹${Number(b.total_amount || 0).toLocaleString('en-IN')}</td>
+                        <td>
+                            <span style="
+                                background:${badgeColor(b.booking_status)};
+                                padding:4px 12px;
+                                border-radius:12px;
+                                font-size:0.7rem;
+                                font-weight:600;
+                                color:#fff;
+                                display:inline-block;
+                            ">${b.booking_status || '—'}</span>
+                        </td>
                     `;
                     tbody.appendChild(tr);
                 });
             } catch (err) {
-                console.error(err);
+                console.error('Bookings load error:', err);
+                const tbody = document.getElementById('recentBookings');
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#e50914; padding:2rem;">⚠️ Failed to load bookings — ${err.message || 'Unknown error'}</td></tr>`;
             }
+
+            // Load revenue (default: all time)
+            await loadRevenue();
         }
+
         loadStats();
     </script>
 </body>

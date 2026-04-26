@@ -135,6 +135,12 @@ def admin_stats(_):
 def admin_stats_summary(_):
     return admin_controller.admin_get_stats()
 
+@app.route('/api/admin/revenue', methods=['GET'])
+@admin_required
+def admin_revenue(_):
+    period = request.args.get('period', 'all')
+    return admin_controller.get_revenue_by_period(period)
+
 # Movies CRUD
 @app.route('/api/admin/movies', methods=['POST'])
 @admin_required
@@ -205,4 +211,4 @@ def admin_get_users(_):
     return admin_controller.get_all_users()
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0',debug=True, port=5000)

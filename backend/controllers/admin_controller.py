@@ -8,7 +8,6 @@ def get_stats():
         if not conn:
             return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
-        # Summary for main dashboard
         cursor.execute("SELECT COUNT(*) as count FROM MOVIES")
         m_count = cursor.fetchone()['count']
         cursor.execute("SELECT COUNT(*) as count FROM THEATRE")
@@ -19,7 +18,7 @@ def get_stats():
         b_count = cursor.fetchone()['count']
         cursor.execute("SELECT SUM(total_amount) as revenue FROM BOOKING WHERE booking_status = 'Confirmed'")
         total_rev = cursor.fetchone()['revenue'] or 0
-        
+
         return jsonify({
             'movies': m_count,
             'theatres': t_count,
@@ -34,6 +33,47 @@ def get_stats():
 
 def admin_get_stats(): # Alias for compatibility
     return get_stats()
+
+# --- Revenue Filter by Period ---
+def get_revenue_by_period(period):
+    """Return revenue filtered by: 'today', 'month', 'year'"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'message': 'Database connection error'}), 500
+        cursor = conn.cursor(dictionary=True)
+
+        if period == 'today':
+            date_filter = "DATE(b.booking_time) = CURDATE()"
+            label = "Today"
+        elif period == 'month':
+            date_filter = "MONTH(b.booking_time) = MONTH(CURDATE()) AND YEAR(b.booking_time) = YEAR(CURDATE())"
+            label = "This Month"
+        elif period == 'year':
+            date_filter = "YEAR(b.booking_time) = YEAR(CURDATE())"
+            label = "This Year"
+        else:
+            date_filter = "1=1"   # all time
+            label = "All Time"
+
+        cursor.execute(f"""
+            SELECT 
+                COALESCE(SUM(b.total_amount), 0) AS revenue,
+                COUNT(b.booking_id)              AS bookings
+            FROM BOOKING b
+            WHERE b.booking_status = 'Confirmed'
+              AND {date_filter}
+        """)
+        row = cursor.fetchone()
+        return jsonify({
+            'period': label,
+            'revenue': float(row['revenue']),
+            'bookings': int(row['bookings'])
+        }), 200
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
+    finally:
+        if 'conn' in locals() and conn: conn.close()
 
 # --- Movies ---
 def add_movie(data):
@@ -240,7 +280,14 @@ def get_admin_bookings():
             return jsonify({'message': 'Database connection error. Verify your cloud host settings.'}), 500
         cursor = conn.cursor(dictionary=True)
         query = """
-            SELECT b.*, u.name as user_name, u.email, m.title as movie_title, t.name as theatre_name 
+            SELECT 
+                b.booking_id, b.user_id, b.show_id,
+                CAST(b.total_amount AS CHAR) as total_amount,
+                b.booking_status,
+                DATE_FORMAT(b.booking_time, '%Y-%m-%d %H:%i:%s') as created_at,
+                u.name as user_name, u.email,
+                m.title as movie_title,
+                t.name as theatre_name
             FROM BOOKING b
             JOIN USERS u ON b.user_id = u.user_id
             JOIN SHOWS s ON b.show_id = s.show_id
