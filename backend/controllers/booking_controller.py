@@ -29,7 +29,7 @@ def create_booking(user_id, data):
         total_amount = sum(float(show['price_base']) * float(seat['price_multiplier']) for seat in seats)
         
         # Apply discount using Function if applicable
-        cursor.execute("SELECT Calculate_Discount(%s) AS discount", (total_amount,))
+        cursor.execute("SELECT Calculate_Discount_Amount(%s) AS discount", (total_amount,))
         discount = cursor.fetchone()['discount']
         final_amount = float(total_amount) - float(discount)
         
