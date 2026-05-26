@@ -140,6 +140,26 @@ LEFT JOIN SHOWS s ON m.movie_id = s.movie_id
 LEFT JOIN BOOKING b ON s.show_id = b.show_id AND b.booking_status = 'Confirmed'
 GROUP BY m.movie_id, m.title;
 
+-- View 3: Detailed Booking View for User History
+CREATE OR REPLACE VIEW View_User_Booking_Details AS
+SELECT 
+    b.booking_id,
+    u.email,
+    m.title AS movie_title,
+    t.name AS theatre_name,
+    s.show_time AS show_time,
+    b.total_amount,
+    b.booking_status,
+    GROUP_CONCAT(st.seat_number) AS seats
+FROM BOOKING b
+JOIN USERS u ON b.user_id = u.user_id
+JOIN SHOWS s ON b.show_id = s.show_id
+JOIN MOVIES m ON s.movie_id = m.movie_id
+JOIN THEATRE t ON s.theatre_id = t.theatre_id
+JOIN BOOKING_SEAT bs ON b.booking_id = bs.booking_id
+JOIN SEAT st ON bs.seat_id = st.seat_id
+GROUP BY b.booking_id;
+
 -- =============================================
 -- 10, 11, 12. STORED PROGRAMS (Procedures, Functions, Triggers, Cursors)
 -- =============================================

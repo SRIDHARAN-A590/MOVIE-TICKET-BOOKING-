@@ -44,13 +44,13 @@ def get_revenue_by_period(period):
         cursor = conn.cursor(dictionary=True)
 
         if period == 'today':
-            date_filter = "DATE(b.booking_time) = CURDATE()"
+            date_filter = "DATE(b.created_at) = CURDATE()"
             label = "Today"
         elif period == 'month':
-            date_filter = "MONTH(b.booking_time) = MONTH(CURDATE()) AND YEAR(b.booking_time) = YEAR(CURDATE())"
+            date_filter = "MONTH(b.created_at) = MONTH(CURDATE()) AND YEAR(b.created_at) = YEAR(CURDATE())"
             label = "This Month"
         elif period == 'year':
-            date_filter = "YEAR(b.booking_time) = YEAR(CURDATE())"
+            date_filter = "YEAR(b.created_at) = YEAR(CURDATE())"
             label = "This Year"
         else:
             date_filter = "1=1"   # all time
@@ -284,7 +284,7 @@ def get_admin_bookings():
                 b.booking_id, b.user_id, b.show_id,
                 CAST(b.total_amount AS CHAR) as total_amount,
                 b.booking_status,
-                DATE_FORMAT(b.booking_time, '%Y-%m-%d %H:%i:%s') as created_at,
+                DATE_FORMAT(b.created_at, '%Y-%m-%d %H:%i:%s') as created_at,
                 u.name as user_name, u.email,
                 m.title as movie_title,
                 t.name as theatre_name
@@ -293,7 +293,7 @@ def get_admin_bookings():
             JOIN SHOWS s ON b.show_id = s.show_id
             JOIN MOVIES m ON s.movie_id = m.movie_id
             JOIN THEATRE t ON s.theatre_id = t.theatre_id
-            ORDER BY b.booking_time DESC
+            ORDER BY b.created_at DESC
         """
         cursor.execute(query)
         res = cursor.fetchall()
