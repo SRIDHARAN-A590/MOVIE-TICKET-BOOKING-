@@ -18,37 +18,70 @@
         <div class="logo"><a href="index.html" style="text-decoration:none; color:inherit;">CineTick</a></div>
     </nav>
 
-    <main class="container" style="display:flex; align-items:center; justify-content:center; min-height: 80vh;">
-        <div class="summary-card" style="max-width: 500px; padding: 3rem; background: rgba(20,20,20,0.7); backdrop-filter: blur(30px); border-radius: 24px;">
-            <h2 style="text-align:center; font-size: 2rem; margin-bottom: 2rem;">Secure Payment</h2>
+    <main class="container" style="display:flex; align-items:center; justify-content:center; min-height: 90vh; padding: 2rem;">
+        <div class="summary-card" style="max-width: 480px; width: 100%; padding: 3rem; background: rgba(18, 16, 28, 0.65); backdrop-filter: blur(45px); -webkit-backdrop-filter: blur(45px); border-radius: 28px; border: 1px solid var(--border); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), var(--glow);">
             
-            <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 16px; margin-bottom: 2.5rem; border-left: 5px solid var(--primary);">
-                <p style="color:var(--text-gray); font-size:0.9rem; margin-bottom: 0.5rem;">Amount to Pay</p>
-                <h3 id="payAmount" style="font-size: 2.5rem; color: white; line-height:1;"></h3>
+            <h2 style="text-align:center; font-size: 2.2rem; font-weight: 800; margin-bottom: 2rem; background: linear-gradient(to bottom, #ffffff, #c2c0d1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Secure Payment</h2>
+            
+            <!-- Virtual Card Representation -->
+            <div style="background: linear-gradient(135deg, #ff2a5f 0%, #8b5cf6 100%); padding: 1.8rem; border-radius: 20px; margin-bottom: 2.5rem; box-shadow: 0 12px 30px rgba(236, 72, 153, 0.3); position: relative; overflow: hidden; height: 200px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(255,255,255,0.15);">
+                <div style="position: absolute; top: -50px; right: -50px; width: 160px; height: 160px; background: rgba(255, 255, 255, 0.05); border-radius: 50%;"></div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; z-index: 2;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:2px; font-weight: 700; opacity:0.85;">CineTick Pay</div>
+                    <div style="font-size:1.6rem; font-weight:800; opacity:0.9; font-style: italic; letter-spacing: -1px;">VISA</div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; z-index: 2;">
+                    <div style="width: 40px; height: 30px; background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%); border-radius: 6px; box-shadow: inset 0 1px 2px rgba(255,255,255,0.3);"></div>
+                    <div style="display: flex; gap: 4px;">
+                        <div style="width: 8px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 50%;"></div>
+                        <div style="width: 8px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 50%;"></div>
+                        <div style="width: 8px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 50%;"></div>
+                    </div>
+                </div>
+                
+                <div id="visualCardNumber" style="font-size: 1.5rem; font-family: monospace; letter-spacing: 3px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2; margin-top: 10px;">•••• •••• •••• ••••</div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; z-index: 2;">
+                    <div>
+                        <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:1px; opacity:0.6; margin-bottom: 2px;">Card Holder</div>
+                        <div style="font-size:0.9rem; font-weight:600; letter-spacing:0.5px;">VALUED CUSTOMER</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:1px; opacity:0.6; margin-bottom: 2px;">Expires</div>
+                        <div id="visualExpiry" style="font-size:0.9rem; font-weight:600; font-family:monospace;">MM/YY</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 1.2rem 1.8rem; border-radius: 16px; margin-bottom: 2.5rem;">
+                <span style="color:var(--text-gray); font-size:0.95rem;">Amount to Pay</span>
+                <span id="payAmount" style="font-size: 1.8rem; font-weight: 800; color: #ff2a5f; text-shadow: 0 0 15px rgba(255,42,95,0.25);"></span>
             </div>
 
             <form id="paymentForm">
                 <div class="form-group">
-                    <label style="color:var(--text-gray); font-size: 0.9rem;">Card Number</label>
-                    <input type="text" id="cardNumber" class="form-control" style="background:#111; letter-spacing: 3px;" placeholder="4444 4444 4444 4444" maxlength="19" required>
+                    <label>Card Number</label>
+                    <input type="text" id="cardNumber" class="form-control" placeholder="4444 4444 4444 4444" maxlength="19" required autocomplete="off">
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                     <div class="form-group">
-                        <label style="color:var(--text-gray); font-size: 0.9rem;">Expiry Date</label>
-                        <input type="text" id="expiry" class="form-control" style="background:#111;" placeholder="MM/YY" maxlength="5" required>
+                        <label>Expiry Date</label>
+                        <input type="text" id="expiry" class="form-control" placeholder="MM/YY" maxlength="5" required autocomplete="off">
                     </div>
                     <div class="form-group">
-                        <label style="color:var(--text-gray); font-size: 0.9rem;">CVV</label>
-                        <input type="password" id="cvv" class="form-control" style="background:#111;" placeholder="***" maxlength="3" required>
+                        <label>CVV</label>
+                        <input type="password" id="cvv" class="form-control" placeholder="***" maxlength="3" required autocomplete="off">
                     </div>
                 </div>
                 
-                <button type="submit" id="payBtn" class="btn btn-primary" style="width:100%; padding:1.2rem; font-size:1.2rem; margin-top:2.5rem; border-radius: 12px; font-weight:700;">
+                <button type="submit" id="payBtn" class="btn btn-primary" style="width:100%; padding:1.2rem; font-size:1.15rem; margin-top:2.5rem; border-radius: 50px; font-weight:700;">
                     PAY SECURELY
                 </button>
             </form>
             
-            <p style="text-align:center; color:var(--text-gray); font-size:0.8rem; margin-top:2rem; opacity:0.6;">
+            <p style="text-align:center; color:var(--text-gray); font-size:0.85rem; margin-top:2rem; opacity:0.6; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
                 🔒 SSL Encrypted & Secure Payment
             </p>
         </div>
@@ -73,13 +106,17 @@
         }
         document.getElementById('loader').style.display = 'none';
 
-        // Simple Card Formatting
+        // Dynamic Card Graphic Updating
         document.getElementById('cardNumber').addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+            let val = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+            e.target.value = val;
+            document.getElementById('visualCardNumber').textContent = val || '•••• •••• •••• ••••';
         });
 
         document.getElementById('expiry').addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{2})/, '$1/').trim();
+            let val = e.target.value.replace(/[^\d]/g, '').replace(/(.{2})/, '$1/').trim();
+            e.target.value = val;
+            document.getElementById('visualExpiry').textContent = val || 'MM/YY';
         });
 
         document.getElementById('paymentForm').addEventListener('submit', async (e) => {
@@ -87,7 +124,7 @@
             const btn = document.getElementById('payBtn');
             const originalText = btn.textContent;
             
-            btn.innerHTML = '<span class="loader" style="width:20px; height:20px; border-width:2px; display:inline-block;"></span> PROCESSING...';
+            btn.innerHTML = '<span class="loader" style="width:20px; height:20px; border-width:2px; display:inline-block; margin-right: 10px;"></span> PROCESSING...';
             btn.disabled = true;
 
             try {
