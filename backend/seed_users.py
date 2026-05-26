@@ -1,4 +1,4 @@
-import os, bcrypt
+import os, bcrypt, mysql.connector
 from dotenv import load_dotenv
 
 load_dotenv()
