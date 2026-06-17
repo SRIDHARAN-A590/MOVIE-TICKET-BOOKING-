@@ -2,6 +2,9 @@
 
 A full-stack Movie Ticket Booking System built with HTML/CSS/JS (Frontend), Python Flask (Backend), and MySQL (Database).
 
+**Live Demo (Frontend Hosted on Firebase):** [https://first-project-a9290.web.app](https://first-project-a9290.web.app)
+
+
 ## Prerequisites
 - Python 3.8+
 - MySQL Server

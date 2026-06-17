@@ -73,6 +73,10 @@ def register():
 def login():
     return auth_controller.login_user(request.json)
 
+@app.route('/api/auth/google', methods=['POST'])
+def google_login():
+    return auth_controller.google_login_user(request.json)
+
 
 @app.route('/api/proxy/image')
 def proxy_image():
