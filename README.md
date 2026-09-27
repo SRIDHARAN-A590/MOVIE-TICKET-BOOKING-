@@ -8,14 +8,24 @@ A full-stack Movie Ticket Booking System built with HTML/CSS/JS (Frontend), Pyth
 ## Prerequisites
 - Python 3.8+
 - MySQL Server
-- Node.js (Optional, usually for frontend servers but you can just use Live Server)
 
 ## Setup Instructions
 
 ### 1. Database Setup (MySQL)
-1. Open your MySQL client (e.g., MySQL Workbench, phpMyAdmin, or CLI).
-2. Execute the `backend/database/schema.sql` completely. It contains the logic for creating tables, triggers, functions, stored procedures, and views.
-3. Execute the `backend/database/seed.sql` to populate dummy movies, theatres, shows, and seats so you can test out the UI immediately.
+1. Create a `.env` file in the `backend` folder with your MySQL credentials:
+   ```env
+   DB_HOST=localhost
+   DB_USER=root
+   DB_PASSWORD=your_password
+   DB_NAME=movie_booking_system
+   DB_PORT=3306
+   ```
+2. Run the database setup scripts from the `backend` folder:
+   ```bash
+   cd backend
+   python reset_db.py
+   python run_db_setup.py
+   ```
 
 ### 2. Backend Setup (Flask)
 1. Navigate to the `backend` folder:

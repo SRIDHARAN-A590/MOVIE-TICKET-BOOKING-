@@ -1,49 +1,73 @@
 // Admin API handling
 const AdminApi = {
     async getStats() {
-        return Api.request('/admin/stats');
+        const moviesSnap = await window.fsGetDocs(window.fsCollection(window.firebaseDb, 'movies'));
+        const theatresSnap = await window.fsGetDocs(window.fsCollection(window.firebaseDb, 'theatres'));
+        const showsSnap = await window.fsGetDocs(window.fsCollection(window.firebaseDb, 'shows'));
+        const usersSnap = await window.fsGetDocs(window.fsCollection(window.firebaseDb, 'users'));
+        const bookingsSnap = await window.fsGetDocs(window.fsCollection(window.firebaseDb, 'bookings'));
+        
+        return {
+            movies: moviesSnap.size,
+            theatres: theatresSnap.size,
+            shows: showsSnap.size,
+            users: usersSnap.size,
+            bookings: bookingsSnap.size
+        };
     },
     async getMovies() {
-        return Api.request('/movies');
+        return Api.getMovies();
     },
     async addMovie(data) {
-        return Api.request('/admin/movies', 'POST', data);
+        const docRef = await window.fsAddDoc(window.fsCollection(window.firebaseDb, 'movies'), data);
+        return { id: docRef.id, ...data };
     },
     async updateMovie(id, data) {
-        return Api.request(`/admin/movies/${id}`, 'PUT', data);
+        await window.fsUpdateDoc(window.fsDoc(window.firebaseDb, 'movies', id), data);
+        return { id, ...data };
     },
     async deleteMovie(id) {
-        return Api.request(`/admin/movies/${id}`, 'DELETE');
+        await window.fsDeleteDoc(window.fsDoc(window.firebaseDb, 'movies', id));
+        return { success: true };
     },
     async getTheatres() {
-        return Api.request('/admin/theatres');
+        const snap = await window.fsGetDocs(window.fsCollection(window.firebaseDb, 'theatres'));
+        return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
     async addTheatre(data) {
-        return Api.request('/admin/theatres', 'POST', data);
+        const docRef = await window.fsAddDoc(window.fsCollection(window.firebaseDb, 'theatres'), data);
+        return { id: docRef.id, ...data };
     },
     async deleteTheatre(id) {
-        return Api.request(`/admin/theatres/${id}`, 'DELETE');
+        await window.fsDeleteDoc(window.fsDoc(window.firebaseDb, 'theatres', id));
+        return { success: true };
     },
     async getShows() {
-        return Api.request('/admin/shows');
+        const snap = await window.fsGetDocs(window.fsCollection(window.firebaseDb, 'shows'));
+        return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
     async addShow(data) {
-        return Api.request('/admin/shows', 'POST', data);
+        const docRef = await window.fsAddDoc(window.fsCollection(window.firebaseDb, 'shows'), data);
+        return { id: docRef.id, ...data };
     },
     async updateShow(id, data) {
-        return Api.request(`/admin/shows/${id}`, 'PUT', data);
+        await window.fsUpdateDoc(window.fsDoc(window.firebaseDb, 'shows', id), data);
+        return { id, ...data };
     },
     async deleteShow(id) {
-        return Api.request(`/admin/shows/${id}`, 'DELETE');
+        await window.fsDeleteDoc(window.fsDoc(window.firebaseDb, 'shows', id));
+        return { success: true };
     },
     async getBookings() {
-        return Api.request('/admin/bookings');
+        const snap = await window.fsGetDocs(window.fsCollection(window.firebaseDb, 'bookings'));
+        return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
     async cancelBooking(id) {
-        return Api.request(`/admin/bookings/${id}`, 'DELETE');
+        return Api.cancelBooking(id);
     },
     async getUsers() {
-        return Api.request('/admin/users');
+        const snap = await window.fsGetDocs(window.fsCollection(window.firebaseDb, 'users'));
+        return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     }
 };
 
